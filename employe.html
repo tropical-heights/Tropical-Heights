@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tropical Heights - Espace Employé</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h2>Tropical Heights</h2>
+            <p>Espace Employé — Enregistrement des Ventes</p>
+        </header>
+
+        <section class="form-section">
+            <h3>Nouvelle Vente</h3>
+            <form id="saleForm">
+                <div class="input-group">
+                    <label for="item">Article vendu</label>
+                    <select id="item" required>
+                        <option value="">-- Choisir un article --</option>
+                        <option value="Entree simple">Entrée Simple (500$)</option>
+                        <option value="Entree VIP">Entrée VIP (1500$)</option>
+                        <option value="Cocktail Tropical">Cocktail Tropical (200$)</option>
+                        <option value="Bouteille de Champagne">Bouteille de Champagne (5000$)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="quantity">Quantité</label>
+                    <input type="number" id="quantity" min="1" value="1" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="client">Nom du client (ou ID)</label>
+                    <input type="text" id="client" placeholder="Ex: Jean Paul ou ID 42" required>
+                </div>
+
+                <button type="submit">Valider la vente</button>
+            </form>
+        </section>
+
+        <section class="history-section">
+            <h3>Mes ventes du jour</h3>
+            <table id="salesTable">
+                <thead>
+                    <tr>
+                        <th>Article</th>
+                        <th>Quantité</th>
+                        <th>Client</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="salesList">
+                    </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script>
+      // Fonction pour charger dynamiquement la carte du Tropical Heights dans le formulaire employé
+function chargerCarteEmploye() {
+    const articles = JSON.parse(localStorage.getItem('articles')) || [];
+    const select = document.getElementById('item');
+    
+    // On garde uniquement la première option par défaut
+    select.innerHTML = '<option value="">-- Choisir un article --</option>';
+
+    articles.forEach(article => {
+        const option = document.createElement('option');
+        option.value = article.nom;
+        option.dataset.prix = article.prix; // On stocke le prix secrètement dans l'option
+        option.textContent = `${article.nom} (${article.prix}$)`;
+        select.appendChild(option);
+    });
+}
+
+// Gestion de la validation d'une vente
+document.getElementById('saleForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const select = document.getElementById('item');
+    const itemNom = select.value;
+    const itemPrix = parseInt(select.options[select.selectedIndex].dataset.prix);
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const client = document.getElementById('client').value;
+    
+    const total = itemPrix * quantity;
+
+    // Ajouter la ligne dans le tableau des ventes de l'employé
+    const salesList = document.getElementById('salesList');
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td>${itemNom}</td>
+        <td>${quantity}</td>
+        <td>${client}</td>
+        <td>${total}$</td>
+    `;
+    salesList.appendChild(row);
+
+    // Réinitialiser le formulaire
+    document.getElementById('saleForm').reset();
+});
+
+// Charger la carte mise à jour dès que l'employé se connecte
+chargerCarteEmploye();
+    </script>
+</body>
+</html>

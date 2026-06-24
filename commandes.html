@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tropical Heights - Espace Commandes Entreprises</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h2>Tropical Heights</h2>
+            <p>Espace Partenaires — Passer une commande de stock</p>
+        </header>
+
+        <section class="form-section">
+            <h3>Passer une commande</h3>
+            <form id="orderForm">
+                <div class="input-group">
+                    <label for="orderItem">Article souhaité</label>
+                    <select id="orderItem" required>
+                        </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="orderQuantity">Quantité</label>
+                    <input type="number" id="orderQuantity" min="1" value="10" required>
+                </div>
+
+                <button type="submit">Envoyer la commande au Tropical Heights</button>
+            </form>
+        </section>
+
+        <section class="history-section">
+            <h3>Nos Commandes Récentes</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Article</th>
+                        <th>Quantité</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersList">
+                    <tr>
+                        <td>Bouteille de Champagne</td>
+                        <td>20</td>
+                        <td><span style="color: #ffaa00;">En attente de livraison</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script>
+      // Charger la carte décidée par le boss
+function chargerCartePourClients() {
+    const articles = JSON.parse(localStorage.getItem('articles')) || [];
+    const select = document.getElementById('orderItem');
+    select.innerHTML = '<option value="">-- Choisir un produit --</option>';
+
+    articles.forEach(article => {
+        const option = document.createElement('option');
+        option.value = article.nom;
+        option.textContent = `${article.nom} (${article.prix}$)`;
+        select.appendChild(option);
+    });
+}
+
+// Envoyer la commande au Boss
+document.getElementById('orderForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const item = document.getElementById('orderItem').value;
+    const qty = parseInt(document.getElementById('orderQuantity').value);
+    
+    // On récupère le nom du client actuellement connecté (par exemple Benny)
+    // Pour l'instant on simule ou on peut laisser l'utilisateur taper, mais restons simple :
+    const entrepriseNom = prompt("Confirmez le nom de votre Entreprise (ex: Benny's, Taxi...) :") || "Entreprise Anonyme";
+
+    // Récupérer les commandes existantes
+    let commandesGlobales = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+    
+    // Ajouter la nouvelle commande à la liste
+    commandesGlobales.push({
+        entreprise: entrepriseNom,
+        article: item,
+        quantite: qty,
+        statut: "En attente"
+    });
+
+    // Sauvegarder dans le localStorage partagé
+    localStorage.setItem('commandesGlobales', JSON.stringify(commandesGlobales));
+
+    alert("Commande transmise au Tropical Heights !");
+    document.getElementById('orderForm').reset();
+    afficherMesCommandes(); // Rafraîchir l'affichage client
+});
+
+// Afficher uniquement les commandes sur l'écran du client
+function afficherMesCommandes() {
+    const commandesGlobales = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+    const tbody = document.getElementById('ordersList');
+    tbody.innerHTML = '';
+
+    commandesGlobales.forEach(cmd => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${cmd.article}</td>
+            <td>${cmd.quantite}</td>
+            <td><span style="color: ${cmd.statut === 'En attente' ? '#ffaa00' : '#00ffcc'}">${cmd.statut}</span></td>
+        `;
+        tbody.insertBefore(row, tbody.firstChild);
+    });
+}
+
+chargerCartePourClients();
+afficherMesCommandes();
+    </script>
+</body>
+</html>

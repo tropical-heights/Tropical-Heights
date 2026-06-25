@@ -120,7 +120,7 @@ function chargerComptaAdmin() {
         } else {
             archivesGlobales.forEach(archive => {
                 const p = document.createElement('p');
-                p style.color = "#ecf0f1";
+               p.style.color = "#ecf0f1";
                 p.style.margin = "5px 0";
                 p.style.fontSize = "14px";
                 p.innerHTML = archive.texte;

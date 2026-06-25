@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tropical Heights - Panel Administration Professionnel</title>
     <style>
-        /* BASE STYLE INTRANET */
         body {
             background-color: #0b131a;
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -15,8 +14,6 @@
             display: flex;
             min-height: 100vh;
         }
-
-        /* SIDEBAR DE NAVIGATION ACCOMPAGNANTE */
         .sidebar {
             width: 260px;
             background: linear-gradient(180deg, #111b24 0%, #0d161e 100%);
@@ -26,7 +23,6 @@
             flex-direction: column;
             box-sizing: border-box;
         }
-
         .sidebar h2 {
             color: #00ffcc;
             font-size: 20px;
@@ -38,7 +34,6 @@
             border-bottom: 2px solid #1f3141;
             padding-bottom: 15px;
         }
-
         .sidebar-menu {
             list-style: none;
             padding: 0;
@@ -47,7 +42,6 @@
             flex-direction: column;
             gap: 12px;
         }
-
         .sidebar-menu li a {
             color: #a5b1c2;
             text-decoration: none;
@@ -59,15 +53,12 @@
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid transparent;
         }
-
         .sidebar-menu li a:hover, .sidebar-menu li a.active {
             color: #ffffff;
             background: linear-gradient(90deg, #1c2d3d 0%, #152330 100%);
             border-color: #00ffcc;
             padding-left: 20px;
         }
-
-        /* CONTENU PRINCIPAL DE L'INTRANET */
         .main-content {
             flex: 1;
             padding: 40px;
@@ -75,22 +66,18 @@
             box-sizing: border-box;
             overflow-y: auto;
         }
-
         .header-panel {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 35px;
         }
-
         .header-panel h1 {
             font-size: 28px;
             font-weight: 700;
             color: #ffffff;
             margin: 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
-
         .status-badge {
             background: rgba(0, 255, 204, 0.1);
             color: #00ffcc;
@@ -100,15 +87,12 @@
             font-weight: 600;
             border: 1px solid rgba(0, 255, 204, 0.3);
         }
-
-        /* GRILLES ET CONTENEURS DES MODULES BOARDS */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 30px;
             margin-bottom: 35px;
         }
-
         .card {
             background: #121f2b;
             border: 1px solid #1f3141;
@@ -117,11 +101,9 @@
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
             box-sizing: border-box;
         }
-
         .card-full {
             grid-column: 1 / -1;
         }
-
         .card h3 {
             margin-top: 0;
             margin-bottom: 20px;
@@ -129,12 +111,7 @@
             color: #ffffff;
             border-bottom: 1px solid #1f3141;
             padding-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
-
-        /* BADGE FINANCIER DU CHIFFRE D'AFFAIRES */
         .ca-box {
             background: linear-gradient(135deg, #172a3a 0%, #11202e 100%);
             border: 1px solid #253d54;
@@ -142,40 +119,29 @@
             padding: 30px;
             text-align: center;
             margin-bottom: 35px;
-            box-shadow: inset 0 1px 3px rgba(255,255,255,0.05);
         }
-
         .ca-box p {
             margin: 0;
             color: #8b9bb4;
             font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 2px;
-            font-weight: 600;
         }
-
         .ca-box .amount {
             font-size: 46px;
             color: #00ffcc;
             font-weight: 800;
             margin-top: 12px;
-            letter-spacing: 1px;
-            text-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
         }
-
-        /* FORMULAIRES DE GESTION ACCÈS */
         .form-group {
             margin-bottom: 18px;
         }
-
         .form-group label {
             display: block;
             margin-bottom: 8px;
             color: #a5b1c2;
             font-size: 14px;
-            font-weight: 500;
         }
-
         .form-control {
             width: 100%;
             padding: 12px;
@@ -185,15 +151,7 @@
             color: #ffffff;
             font-size: 14px;
             box-sizing: border-box;
-            transition: border-color 0.3s ease;
         }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #00ffcc;
-            box-shadow: 0 0 5px rgba(0, 255, 204, 0.2);
-        }
-
         .btn-submit {
             width: 100%;
             padding: 14px;
@@ -202,50 +160,25 @@
             border: none;
             border-radius: 6px;
             font-weight: 700;
-            font-size: 15px;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: transform 0.1s ease, opacity 0.2s ease;
         }
-
-        .btn-submit:active {
-            transform: scale(0.99);
-        }
-
-        /* TABLEAUX SÉCURISÉS DES PERFORMANCES */
-        .table-container {
-            overflow-x: auto;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
-            text-align: left;
         }
-
         th {
             background-color: #182836;
             color: #a5b1c2;
             padding: 14px;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
             border: 1px solid #1f3141;
+            text-align: left;
         }
-
         td {
             padding: 14px;
             border: 1px solid #1f3141;
-            font-size: 15px;
             background-color: #101c27;
         }
-
-        tr:nth-child(even) td {
-            background-color: #12212f;
-        }
-
-        /* HISTORIQUE DE SÉCURITÉ ET LOGS */
         .log-flux {
             background: #080f14;
             border: 1px solid #1a2936;
@@ -254,8 +187,6 @@
             max-height: 200px;
             overflow-y: auto;
         }
-
-        /* ACCORDION ACTIONS EN BAS */
         .action-footer {
             margin-top: 40px;
             display: flex;
@@ -264,7 +195,6 @@
             border-top: 1px solid #1f3141;
             padding-top: 25px;
         }
-
         .btn-danger {
             background: #fc5c65;
             color: white;
@@ -273,13 +203,7 @@
             border-radius: 6px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
         }
-
-        .btn-danger:hover {
-            background: #eb4d4b;
-        }
-
         .btn-logout {
             background: #4b6584;
             color: white;
@@ -287,12 +211,6 @@
             padding: 12px 24px;
             border-radius: 6px;
             font-weight: 600;
-            display: inline-block;
-            transition: background 0.2s;
-        }
-
-        .btn-logout:hover {
-            background: #3c526c;
         }
     </style>
 </head>
@@ -301,9 +219,9 @@
     <div class="sidebar">
         <h2>Tropical Heights</h2>
         <ul class="sidebar-menu">
-            <li><a href="#" class="active">Espace Direction</a></li>
+            <li><a href="admin.html" class="active">Espace Direction</a></li>
             <li><a href="employe.html">Interface Serveur</a></li>
-            <li><a href="index.html">Page d'accueil</a></li>
+            <li><a href="index.html">Page d'accueil / Déconnexion</a></li>
         </ul>
     </div>
 
@@ -323,7 +241,7 @@
             
             <div class="card card-full">
                 <h3>📊 Suivi Économique des Employés</h3>
-                <div class="table-container">
+                <div style="overflow-x: auto;">
                     <table>
                         <thead>
                             <tr>
@@ -333,3 +251,51 @@
                             </tr>
                         </thead>
                         <tbody id="corps-tableau-ca">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🔑 Gestion des Accès et Recrutement</h3>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label>Identifiant utilisateur unique :</label>
+                        <input type="text" id="newUsername" class="form-control" placeholder="Ex: Employe2" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mot de passe réseau sécurisé :</label>
+                        <input type="password" id="newPassword" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Habilitation / Rôle système :</label>
+                        <select id="newRole" class="form-control">
+                            <option value="employe">Employé (Saisie des ventes)</option>
+                            <option value="admin">Administrateur / Boss (Accès total)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-submit">Créer et Valider les Accès</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>📜 Journal de Sécurité & Flux en direct</h3>
+                <div id="archives-globales" class="log-flux">
+                    <p style="color: #4b6584; margin: 0; font-size: 14px; font-style: italic;">Aucun flux de données détecté pour le moment.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="action-footer">
+            <button onclick="window.remiseAZeroFiches()" class="btn-danger">
+                Purger la Comptabilité
+            </button>
+            <a href="index.html" class="btn-logout">Fermer la Session</a>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

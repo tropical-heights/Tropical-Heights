@@ -8,13 +8,13 @@ if (!comptes || comptes.length === 0) {
     localStorage.setItem('comptes', JSON.stringify(comptes));
 }
 
-// ====== ARTICLES PAR DÉFAUT SI LA MÉMOIRE EST VIDE ======
+// ====== ARTICLES PAR DÉFAUT AVEC PRIX USINE ======
 let articlesBoutique = JSON.parse(localStorage.getItem('articlesBoutique'));
 if (!articlesBoutique || articlesBoutique.length === 0) {
     articlesBoutique = [
-        { nom: "Entrée Simple", prix: 500 },
-        { nom: "Entrée VIP", prix: 1500 },
-        { nom: "Cocktail Tropical", prix: 200 }
+        { nom: "Entrée Simple", prix: 500, prixUsine: 0 },
+        { nom: "Entrée VIP", prix: 1500, prixUsine: 0 },
+        { nom: "Cocktail Tropical", prix: 200, prixUsine: 100 } // Exemple : acheté 100$, vendu 200$
     ];
     localStorage.setItem('articlesBoutique', JSON.stringify(articlesBoutique));
 }
@@ -56,9 +56,10 @@ if (saleForm) {
     const itemSelect = document.getElementById('itemSelect');
     if (itemSelect) {
         itemSelect.innerHTML = '';
-        articlesBoutique.forEach(art => {
+        articlesBoutique.forEach((art, index) => {
             const opt = document.createElement('option');
-            opt.value = art.prix;
+            // On stocke l'index de l'article pour retrouver facilement le prix et le prix usine
+            opt.value = index; 
             opt.textContent = `${art.nom} (${art.prix}$)`;
             itemSelect.appendChild(opt);
         });
@@ -70,28 +71,35 @@ if (saleForm) {
         const quantityInput = document.getElementById('quantity');
         if (!itemSelect || !quantityInput) return;
 
-        const itemNomBrut = itemSelect.options[itemSelect.selectedIndex].text;
-        // On extrait juste le nom propre sans le prix ($) pour les statistiques propres
-        const itemNom = itemNomBrut.split(' (')[0]; 
-        const itemPrix = parseInt(itemSelect.value) || 0;
+        const artIndex = parseInt(itemSelect.value);
+        const articleChoisi = articlesBoutique[artIndex];
+
+        if (!articleChoisi) return;
+
+        const itemNom = articleChoisi.nom;
+        const itemPrix = articleChoisi.prix;
+        const itemPrixUsine = articleChoisi.prixUsine || 0;
         const quantity = parseInt(quantityInput.value) || 1;
         
         const totalVente = itemPrix * quantity;
+        // Calcul du bénéfice sur cette vente : (Vente - Usine) * Quantité
+        const totalBenefice = (itemPrix - itemPrixUsine) * quantity; 
+
         const nomEmploye = employeConnecte ? employeConnecte.username : "Employe1";
 
         let fichesCompta = JSON.parse(localStorage.getItem('fichesCompta')) || {};
         if (!fichesCompta[nomEmploye]) {
-            fichesCompta[nomEmploye] = { ventes: 0, ca: 0, detail: {} };
+            fichesCompta[nomEmploye] = { ventes: 0, ca: 0, benefices: 0, detail: {} };
         }
         
-        // Sécurité si l'ancien format n'avait pas l'objet "detail"
-        if (!fichesCompta[nomEmploye].detail) {
-            fichesCompta[nomEmploye].detail = {};
-        }
+        // Sécurités pour les anciennes fiches
+        if (!fichesCompta[nomEmploye].detail) fichesCompta[nomEmploye].detail = {};
+        if (!fichesCompta[nomEmploye].benefices) fichesCompta[nomEmploye].benefices = 0;
 
-        // Enregistrement global + détail par produit
+        // Enregistrement de la vente
         fichesCompta[nomEmploye].ventes += quantity;
         fichesCompta[nomEmploye].ca += totalVente;
+        fichesCompta[nomEmploye].benefices += totalBenefice;
         fichesCompta[nomEmploye].detail[itemNom] = (fichesCompta[nomEmploye].detail[itemNom] || 0) + quantity;
         
         localStorage.setItem('fichesCompta', JSON.stringify(fichesCompta));
@@ -99,11 +107,11 @@ if (saleForm) {
         let archivesGlobales = JSON.parse(localStorage.getItem('archivesGlobales')) || [];
         const dateActuelle = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
         archivesGlobales.unshift({
-            texte: `[${dateActuelle}] ${nomEmploye} a vendu ${quantity}x ${itemNom} (${totalVente} $)`
+            texte: `[${dateActuelle}] ${nomEmploye} a vendu ${quantity}x ${itemNom} (Généré: ${totalVente}$, Bénéfice: ${totalBenefice}$)`
         });
         localStorage.setItem('archivesGlobales', JSON.stringify(archivesGlobales));
 
-        alert(`Vente validée avec succès ! Total : ${totalVente} $`);
+        alert(`Vente validée ! Total Généré : ${totalVente} $ | Bénéfice net : ${totalBenefice} $`);
         saleForm.reset();
     });
 }
@@ -138,7 +146,6 @@ if (registerForm) {
     });
 }
 
-// ====== S'INJECTENT DANS LE PANEL SANS TOUCHER AU HTML ======
 function afficherListeComptes() {
     const formAdmin = document.getElementById('registerForm');
     if (!formAdmin) return;
@@ -173,6 +180,7 @@ function afficherListeComptes() {
     });
 }
 
+// ====== INTERFACE D'AJOUT DES ARTICLES (AVEC PRIX USINE) ======
 function initialiserGestionArticlesAdmin() {
     const panelAdmin = document.getElementById('panel-suivi-employes');
     if (!panelAdmin) return;
@@ -197,9 +205,14 @@ function initialiserGestionArticlesAdmin() {
         <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 18px; color: #ffffff; border-bottom: 1px solid #1f3141; padding-bottom: 12px;">🛍️ Gestion des Articles & Prix</h3>
         <div style="margin-bottom: 15px;">
             <label style="display:block; margin-bottom:5px; color:#a5b1c2; font-size:14px;">Nom du produit :</label>
-            <input type="text" id="addArtName" class="form-control" placeholder="Ex: Bière" style="margin-bottom:10px;">
-            <label style="display:block; margin-bottom:5px; color:#a5b1c2; font-size:14px;">Prix ($) :</label>
-            <input type="number" id="addArtPrice" class="form-control" placeholder="Ex: 150" min="0" style="margin-bottom:15px;">
+            <input type="text" id="addArtName" class="form-control" placeholder="Ex: Champagne" style="margin-bottom:10px;">
+            
+            <label style="display:block; margin-bottom:5px; color:#a5b1c2; font-size:14px;">Prix de vente ($) :</label>
+            <input type="number" id="addArtPrice" class="form-control" placeholder="Ex: 200" min="0" style="margin-bottom:10px;">
+            
+            <label style="display:block; margin-bottom:5px; color:#a5b1c2; font-size:14px;">Prix Usine / Coût de revient ($) :</label>
+            <input type="number" id="addArtPriceUsine" class="form-control" placeholder="Ex: 100" min="0" style="margin-bottom:15px;">
+            
             <button onclick="ajouterNouvelItem()" class="btn-submit" style="padding:10px;">Ajouter à la boutique</button>
         </div>
         <div id="liste-items-boutique" style="margin-top:15px; border-top:1px solid #1f3141; paddingTop:10px;"></div>
@@ -210,19 +223,22 @@ function initialiserGestionArticlesAdmin() {
 window.ajouterNouvelItem = function() {
     const nameIn = document.getElementById('addArtName');
     const priceIn = document.getElementById('addArtPrice');
-    if (!nameIn || !priceIn) return;
+    const priceUsineIn = document.getElementById('addArtPriceUsine');
+    if (!nameIn || !priceIn || !priceUsineIn) return;
 
     const nom = nameIn.value.trim();
     const prix = parseInt(priceIn.value) || 0;
+    const prixUsine = parseInt(priceUsineIn.value) || 0;
+
     if (!nom) return;
 
     let listeArts = JSON.parse(localStorage.getItem('articlesBoutique')) || [];
-    listeArts.push({ nom: nom, prix: prix });
+    listeArts.push({ nom: nom, prix: prix, prixUsine: prixUsine });
     localStorage.setItem('articlesBoutique', JSON.stringify(listeArts));
     articlesBoutique = listeArts;
 
-    nameIn.value = ''; priceIn.value = '';
-    alert(`Article "${nom}" ajouté !`);
+    nameIn.value = ''; priceIn.value = ''; priceUsineIn.value = '';
+    alert(`Article "${nom}" ajouté (Vente: ${prix}$, Usine: ${prixUsine}$)!`);
     afficherListeItemsAdmin();
 };
 
@@ -237,7 +253,7 @@ function afficherListeItemsAdmin() {
         const row = document.createElement('div');
         row.style = 'display:flex; justify-content:space-between; align-items:center; background:#09121a; padding:8px; border-radius:6px; margin-bottom:5px; border:1px solid #1f3141; font-size:13px;';
         row.innerHTML = `
-            <span><strong>${art.nom}</strong> - <span style="color:#00ffcc">${art.prix}$</span></span>
+            <span><strong>${art.nom}</strong> - <span style="color:#fff">Vente: ${art.prix}$</span> | <span style="color:#a5b1c2">Usine: ${art.prixUsine || 0}$</span></span>
             <button onclick="supprimerItem(${index})" style="background:#fc5c65; color:white; border:none; padding:3px 6px; border-radius:4px; cursor:pointer;">❌</button>
         `;
         divListe.appendChild(row);
@@ -273,11 +289,22 @@ window.supprimerItem = function(index) {
     }
 };
 
-// ====== AFFICHAGE DE LA COMPTA AVEC MENU DÉROULANT DES DÉTAILS ======
+// ====== AFFICHAGE DE LA COMPTA DU PANEL BOSS ======
 function chargerComptaAdmin() {
     const corpsTableau = document.getElementById('corps-tableau-ca');
     const zoneArchives = document.getElementById('archives-globales');
     const caTotalElement = document.getElementById('ca-total');
+
+    // Modification dynamique des en-têtes de colonnes du tableau HTML existant
+    const tableHeader = document.querySelector('table thead tr');
+    if (tableHeader) {
+        tableHeader.innerHTML = `
+            <th>Identifiant Collaborateur</th>
+            <th style="text-align: center;">Volumes Ventes</th>
+            <th style="text-align: right;">Total Généré</th>
+            <th style="text-align: right; color:#00ffcc;">Total Bénéfices</th>
+        `;
+    }
 
     if (corpsTableau) {
         const fichesCompta = JSON.parse(localStorage.getItem('fichesCompta')) || {};
@@ -287,27 +314,29 @@ function chargerComptaAdmin() {
         Object.keys(fichesCompta).forEach((employe, idx) => {
             const data = fichesCompta[employe];
             cumulCA += data.ca;
+            const beneficeEmploye = data.benefices || 0;
 
-            // 1. Ligne principale de l'employé
+            // Ligne principale cliquable
             const row = document.createElement('tr');
             row.style.cursor = 'pointer';
-            row.title = "Cliquez pour voir/masquer le détail des ventes";
+            row.title = "Cliquez pour voir/masquer le détail";
             row.onclick = () => {
                 const subRow = document.getElementById(`detail-${idx}`);
                 if(subRow) subRow.style.display = (subRow.style.display === 'none') ? 'table-row' : 'none';
             };
 
             row.innerHTML = `
-                <td style="padding: 14px; border: 1px solid #1f3141;">👉 <strong>${employe}</strong> <span style="font-size:11px; color:#a5b1c2;">(cliquer)</span></td>
-                <td style="padding: 14px; border: 1px solid #1f3141; text-align: center; font-weight: bold; color: #00ffcc;">${data.ventes}</td>
-                <td style="padding: 14px; border: 1px solid #1f3141; text-align: right; color: #ffffff; font-weight: bold;">${data.ca} $</td>
+                <td style="padding: 14px; border: 1px solid #1f3141;">👉 <strong>${employe}</strong> <span style="font-size:11px; color:#a5b1c2;">(détail)</span></td>
+                <td style="padding: 14px; border: 1px solid #1f3141; text-align: center;">${data.ventes}</td>
+                <td style="padding: 14px; border: 1px solid #1f3141; text-align: right; font-weight: bold; color: #ffffff;">${data.ca} $</td>
+                <td style="padding: 14px; border: 1px solid #1f3141; text-align: right; font-weight: bold; color: #00ffcc;">${beneficeEmploye} $</td>
             `;
             corpsTableau.appendChild(row);
 
-            // 2. Construction du sous-menu déroulant (caché par défaut)
+            // Sous-menu déroulant (Contient le détail)
             const subRow = document.createElement('tr');
             subRow.id = `detail-${idx}`;
-            subRow.style.display = 'none'; // Masqué au début
+            subRow.style.display = 'none';
             
             let htmlDetail = `<ul style="margin:0; padding-left:20px; color:#a5b1c2; font-size:13px; line-height:1.6;">`;
             if (data.detail && Object.keys(data.detail).length > 0) {
@@ -315,13 +344,13 @@ function chargerComptaAdmin() {
                     htmlDetail += `<li><strong style="color:#fff;">${data.detail[prod]}x</strong> ${prod}</li>`;
                 });
             } else {
-                htmlDetail += `<li>Aucun détail disponible (anciennes ventes)</li>`;
+                htmlDetail += `<li>Aucun détail disponible</li>`;
             }
             htmlDetail += `</ul>`;
 
             subRow.innerHTML = `
-                <td colspan="3" style="background-color: #09121a; border: 1px solid #1f3141; padding: 15px;">
-                    <span style="color:#00ffcc; font-size:12px; font-weight:bold; text-transform:uppercase; display:block; margin-bottom:8px;">📦 Détail des articles vendus :</span>
+                <td colspan="4" style="background-color: #09121a; border: 1px solid #1f3141; padding: 15px;">
+                    <span style="color:#00ffcc; font-size:12px; font-weight:bold; text-transform:uppercase; display:block; margin-bottom:8px;">📦 Articles vendus :</span>
                     ${htmlDetail}
                 </td>
             `;

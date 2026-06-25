@@ -25,6 +25,25 @@ document.getElementById('loginForm')?.addEventListener('submit', function(e) {
     const password = document.getElementById('password').value;
     const errorMessage = document.getElementById('error-message');
 
+    const comptes = JSON.parse(localStorage.getItem('comptes'));
+    const compteTrouve = comptes.find(c => c.username === username && c.password === password);
+
+    if (compteTrouve) {
+        // Sauvegarder l'identifiant de la session en cours
+        sessionStorage.setItem('employeConnecte', compteTrouve.username);
+
+        if (compteTrouve.role === "admin") {
+            window.location.href = "admin.html";
+        } else if (compteTrouve.role === "employe") {
+            window.location.href = "employe.html";
+        } else if (compteTrouve.role === "client") {
+            window.location.href = "commandes.html";
+        }
+    } else {
+        errorMessage.textContent = "Identifiant ou mot de passe incorrect, ou accès non autorisé.";
+    }
+});
+
     // Récupérer tous les comptes enregistrés
     const comptes = JSON.parse(localStorage.getItem('comptes'));
 
@@ -42,7 +61,7 @@ document.getElementById('loginForm')?.addEventListener('submit', function(e) {
     } else {
         errorMessage.textContent = "Identifiant ou mot de passe incorrect, ou accès non autorisé.";
     }
-});
+
 // ====== GESTION DYNAMIQUE DES EMPLOYÉS & DU CA POUR LE BOSS ======
 
 // 1. Fonction pour afficher le récapitulatif de TOUS les comptes actifs
@@ -122,3 +141,25 @@ document.addEventListener("DOMContentLoaded", () => {
         chargerPanelAdminCalculs();
     }
 });
+// Fonction universelle pour enregistrer une vente depuis n'importe quelle page
+window.enregistrerUneVente = function(montant) {
+    // 1. Récupérer automatiquement l'identifiant de l'employé connecté
+    let employeActuel = sessionStorage.getItem('employeConnecte') || "Inconnu";
+    let montantVente = parseFloat(montant);
+
+    if (isNaN(montantVente) || montantVente <= 0) return;
+
+    // 2. Ajouter au CA de la semaine de l'employé
+    let caEmployes = JSON.parse(localStorage.getItem('caEmployes')) || {};
+    caEmployes[employeActuel] = (caEmployes[employeActuel] || 0) + montantVente;
+    localStorage.setItem('caEmployes', JSON.stringify(caEmployes));
+
+    // 3. Ajouter dans les Archives du Boss
+    let historiqueGlobal = JSON.parse(localStorage.getItem('historiqueGlobal')) || [];
+    historiqueGlobal.push({
+        employe: employeActuel,
+        montant: montantVente,
+        date: new Date().toISOString()
+    });
+    localStorage.setItem('historiqueGlobal', JSON.stringify(historiqueGlobal));
+};

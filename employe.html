@@ -20,10 +20,6 @@
                     <label for="item">Article vendu</label>
                     <select id="item" required>
                         <option value="">-- Choisir un article --</option>
-                        <option value="Entree simple">Entrée Simple (500$)</option>
-                        <option value="Entree VIP">Entrée VIP (1500$)</option>
-                        <option value="Cocktail Tropical">Cocktail Tropical (200$)</option>
-                        <option value="Bouteille de Champagne">Bouteille de Champagne (5000$)</option>
                     </select>
                 </div>
 
@@ -58,53 +54,59 @@
         </section>
     </div>
 
+    <script src="script.js"></script>
+
     <script>
-      // Fonction pour charger dynamiquement la carte du Tropical Heights dans le formulaire employé
-function chargerCarteEmploye() {
-    const articles = JSON.parse(localStorage.getItem('articles')) || [];
-    const select = document.getElementById('item');
-    
-    // On garde uniquement la première option par défaut
-    select.innerHTML = '<option value="">-- Choisir un article --</option>';
+    // Fonction pour charger dynamiquement la carte du Tropical Heights
+    function chargerCarteEmploye() {
+        const articles = JSON.parse(localStorage.getItem('articles')) || [];
+        const select = document.getElementById('item');
+        
+        select.innerHTML = '<option value="">-- Choisir un article --</option>';
 
-    articles.forEach(article => {
-        const option = document.createElement('option');
-        option.value = article.nom;
-        option.dataset.prix = article.prix; // On stocke le prix secrètement dans l'option
-        option.textContent = `${article.nom} (${article.prix}$)`;
-        select.appendChild(option);
+        articles.forEach(article => {
+            const option = document.createElement('option');
+            option.value = article.nom;
+            option.dataset.prix = article.prix; 
+            option.textContent = `${article.nom} (${article.prix}$)`;
+            select.appendChild(option);
+        });
+    }
+
+    // Gestion de la validation d'une vente
+    document.getElementById('saleForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const select = document.getElementById('item');
+        const itemNom = select.value;
+        const itemPrix = parseInt(select.options[select.selectedIndex].dataset.prix);
+        const quantity = parseInt(document.getElementById('quantity').value);
+        const client = document.getElementById('client').value;
+        
+        const total = itemPrix * quantity;
+
+        // 🔥 CONNEXION AVEC LE PANEL BOSS : Envoie les données !
+        if (typeof enregistrerUneVente === "function") {
+            enregistrerUneVente(total);
+        }
+
+        // Ajouter la ligne dans le tableau des ventes visuel de l'employé
+        const salesList = document.getElementById('salesList');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${itemNom}</td>
+            <td>${quantity}</td>
+            <td>${client}</td>
+            <td style="font-weight: bold; color: #2ecc71;">${total}$</td>
+        `;
+        salesList.appendChild(row);
+
+        // Réinitialiser le formulaire pour la prochaine vente
+        document.getElementById('saleForm').reset();
     });
-}
 
-// Gestion de la validation d'une vente
-document.getElementById('saleForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const select = document.getElementById('item');
-    const itemNom = select.value;
-    const itemPrix = parseInt(select.options[select.selectedIndex].dataset.prix);
-    const quantity = parseInt(document.getElementById('quantity').value);
-    const client = document.getElementById('client').value;
-    
-    const total = itemPrix * quantity;
-
-    // Ajouter la ligne dans le tableau des ventes de l'employé
-    const salesList = document.getElementById('salesList');
-    const row = document.createElement('tr');
-    row.innerHTML = `
-        <td>${itemNom}</td>
-        <td>${quantity}</td>
-        <td>${client}</td>
-        <td>${total}$</td>
-    `;
-    salesList.appendChild(row);
-
-    // Réinitialiser le formulaire
-    document.getElementById('saleForm').reset();
-});
-
-// Charger la carte mise à jour dès que l'employé se connecte
-chargerCarteEmploye();
+    // Charger la carte au démarrage
+    chargerCarteEmploye();
     </script>
 </body>
 </html>

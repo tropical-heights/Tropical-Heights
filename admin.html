@@ -285,5 +285,31 @@ afficherCommandesReçues();
             </div>
     </div>
 </div>
+<div id="panel-suivi-employes" style="background: #1e252f; color: white; padding: 20px; border-radius: 8px; margin-top: 30px; font-family: sans-serif;">
+        <h2 style="color: #00ffcc; border-bottom: 2px solid #34495e; padding-bottom: 10px;">📊 Suivi des Employés & CA de la Semaine</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left;">
+            <thead>
+                <tr style="background: #2c3e50; color: #ecf0f1;">
+                    <th style="padding: 12px; border: 1px solid #34495e;">Identifiant Employé</th>
+                    <th style="padding: 12px; border: 1px solid #34495e; text-align: center;">Nombre de Ventes</th>
+                    <th style="padding: 12px; border: 1px solid #34495e; text-align: right;">CA Semaine</th>
+                </tr>
+            </thead>
+            <tbody id="corps-tableau-ca">
+                </tbody>
+        </table>
+        <div style="margin-top: 20px; text-align: right;">
+            <button onclick="remiseAZeroFiches()" style="background: #ff4757; color: white; border: none; padding: 12px 20px; font-weight: bold; border-radius: 5px; cursor: pointer;">
+                🔄 Reset fiches (Remise à zéro compta employés)
+            </button>
+        </div>
+        <div style="margin-top: 30px;">
+            <h3 style="color: #a29bfe; margin-bottom: 10px;">📁 Archives Générales (Historique Sauvegardé)</h3>
+            <div id="archives-globales" style="max-height: 200px; overflow-y: auto; background: #11141a; padding: 15px; border-radius: 5px;"></div>
+        </div>
+    </div>
+
+</body>
+</html>
 </body>
 </html>

@@ -70,7 +70,9 @@ if (saleForm) {
         const quantityInput = document.getElementById('quantity');
         if (!itemSelect || !quantityInput) return;
 
-        const itemNom = itemSelect.options[itemSelect.selectedIndex].text;
+        const itemNomBrut = itemSelect.options[itemSelect.selectedIndex].text;
+        // On extrait juste le nom propre sans le prix ($) pour les statistiques propres
+        const itemNom = itemNomBrut.split(' (')[0]; 
         const itemPrix = parseInt(itemSelect.value) || 0;
         const quantity = parseInt(quantityInput.value) || 1;
         
@@ -79,10 +81,19 @@ if (saleForm) {
 
         let fichesCompta = JSON.parse(localStorage.getItem('fichesCompta')) || {};
         if (!fichesCompta[nomEmploye]) {
-            fichesCompta[nomEmploye] = { ventes: 0, ca: 0 };
+            fichesCompta[nomEmploye] = { ventes: 0, ca: 0, detail: {} };
         }
+        
+        // Sécurité si l'ancien format n'avait pas l'objet "detail"
+        if (!fichesCompta[nomEmploye].detail) {
+            fichesCompta[nomEmploye].detail = {};
+        }
+
+        // Enregistrement global + détail par produit
         fichesCompta[nomEmploye].ventes += quantity;
         fichesCompta[nomEmploye].ca += totalVente;
+        fichesCompta[nomEmploye].detail[itemNom] = (fichesCompta[nomEmploye].detail[itemNom] || 0) + quantity;
+        
         localStorage.setItem('fichesCompta', JSON.stringify(fichesCompta));
 
         let archivesGlobales = JSON.parse(localStorage.getItem('archivesGlobales')) || [];
@@ -97,7 +108,7 @@ if (saleForm) {
     });
 }
 
-// ====== AJOUTER / GÉRER LES ACCÈS (ADMIN.HTML) ======
+// ====== GESTION DES ACCÈS / INSCRIPTION ======
 const registerForm = document.getElementById('registerForm');
 if (registerForm) {
     registerForm.addEventListener('submit', function(e) {
@@ -127,7 +138,7 @@ if (registerForm) {
     });
 }
 
-// ====== FONCTIONS EN PLUS POUR LES COMPTES ET ARTICLES (S'INJECTENT SANS CHANGER LE HTML) ======
+// ====== S'INJECTENT DANS LE PANEL SANS TOUCHER AU HTML ======
 function afficherListeComptes() {
     const formAdmin = document.getElementById('registerForm');
     if (!formAdmin) return;
@@ -178,11 +189,8 @@ function initialiserGestionArticlesAdmin() {
         zoneArticles.style.boxShadow = '0 6px 18px rgba(0, 0, 0, 0.4)';
         zoneArticles.style.boxSizing = 'border-box';
         
-        // On l'injecte juste avant le journal d'activité
         const grid = document.querySelector('.dashboard-grid');
-        if (grid) {
-            grid.appendChild(zoneArticles);
-        }
+        if (grid) grid.appendChild(zoneArticles);
     }
 
     zoneArticles.innerHTML = `
@@ -206,16 +214,14 @@ window.ajouterNouvelItem = function() {
 
     const nom = nameIn.value.trim();
     const prix = parseInt(priceIn.value) || 0;
-
-    if (!nom) { alert("Indique un nom !"); return; }
+    if (!nom) return;
 
     let listeArts = JSON.parse(localStorage.getItem('articlesBoutique')) || [];
     listeArts.push({ nom: nom, prix: prix });
     localStorage.setItem('articlesBoutique', JSON.stringify(listeArts));
     articlesBoutique = listeArts;
 
-    nameIn.value = '';
-    priceIn.value = '';
+    nameIn.value = ''; priceIn.value = '';
     alert(`Article "${nom}" ajouté !`);
     afficherListeItemsAdmin();
 };
@@ -240,7 +246,7 @@ function afficherListeItemsAdmin() {
 
 window.modifierMdp = function(index) {
     let listeComptes = JSON.parse(localStorage.getItem('comptes')) || [];
-    const nouveauMdp = prompt(`Nouveau mot de passe pour ${listeComptes[index].username} :`, listeComptes[index].password);
+    const nouveauMdp = prompt(`Nouveau mot de passe :`, listeComptes[index].password);
     if (nouveauMdp && nouveauMdp.trim() !== "") {
         listeComptes[index].password = nouveauMdp.trim();
         localStorage.setItem('comptes', JSON.stringify(listeComptes));
@@ -250,7 +256,7 @@ window.modifierMdp = function(index) {
 
 window.supprimerCompte = function(index) {
     let listeComptes = JSON.parse(localStorage.getItem('comptes')) || [];
-    if (confirm(`Supprimer l'accès de ${listeComptes[index].username} ?`)) {
+    if (confirm("Supprimer ce compte ?")) {
         listeComptes.splice(index, 1);
         localStorage.setItem('comptes', JSON.stringify(listeComptes));
         afficherListeComptes();
@@ -259,7 +265,7 @@ window.supprimerCompte = function(index) {
 
 window.supprimerItem = function(index) {
     let listeArts = JSON.parse(localStorage.getItem('articlesBoutique')) || [];
-    if (confirm(`Supprimer l'article "${listeArts[index].nom}" ?`)) {
+    if (confirm("Supprimer cet article ?")) {
         listeArts.splice(index, 1);
         localStorage.setItem('articlesBoutique', JSON.stringify(listeArts));
         articlesBoutique = listeArts;
@@ -267,7 +273,7 @@ window.supprimerItem = function(index) {
     }
 };
 
-// ====== AFFICHAGE DE LA COMPTA SUR TON PANEL ======
+// ====== AFFICHAGE DE LA COMPTA AVEC MENU DÉROULANT DES DÉTAILS ======
 function chargerComptaAdmin() {
     const corpsTableau = document.getElementById('corps-tableau-ca');
     const zoneArchives = document.getElementById('archives-globales');
@@ -278,17 +284,48 @@ function chargerComptaAdmin() {
         corpsTableau.innerHTML = '';
         let cumulCA = 0;
 
-        Object.keys(fichesCompta).forEach(employe => {
+        Object.keys(fichesCompta).forEach((employe, idx) => {
             const data = fichesCompta[employe];
             cumulCA += data.ca;
 
+            // 1. Ligne principale de l'employé
             const row = document.createElement('tr');
+            row.style.cursor = 'pointer';
+            row.title = "Cliquez pour voir/masquer le détail des ventes";
+            row.onclick = () => {
+                const subRow = document.getElementById(`detail-${idx}`);
+                if(subRow) subRow.style.display = (subRow.style.display === 'none') ? 'table-row' : 'none';
+            };
+
             row.innerHTML = `
-                <td style="padding: 12px; border: 1px solid #1f3141;"><strong>${employe}</strong></td>
-                <td style="padding: 12px; border: 1px solid #1f3141; text-align: center;">${data.ventes}</td>
-                <td style="padding: 12px; border: 1px solid #1f3141; text-align: right; color: #00ffcc; font-weight: bold;">${data.ca} $</td>
+                <td style="padding: 14px; border: 1px solid #1f3141;">👉 <strong>${employe}</strong> <span style="font-size:11px; color:#a5b1c2;">(cliquer)</span></td>
+                <td style="padding: 14px; border: 1px solid #1f3141; text-align: center; font-weight: bold; color: #00ffcc;">${data.ventes}</td>
+                <td style="padding: 14px; border: 1px solid #1f3141; text-align: right; color: #ffffff; font-weight: bold;">${data.ca} $</td>
             `;
             corpsTableau.appendChild(row);
+
+            // 2. Construction du sous-menu déroulant (caché par défaut)
+            const subRow = document.createElement('tr');
+            subRow.id = `detail-${idx}`;
+            subRow.style.display = 'none'; // Masqué au début
+            
+            let htmlDetail = `<ul style="margin:0; padding-left:20px; color:#a5b1c2; font-size:13px; line-height:1.6;">`;
+            if (data.detail && Object.keys(data.detail).length > 0) {
+                Object.keys(data.detail).forEach(prod => {
+                    htmlDetail += `<li><strong style="color:#fff;">${data.detail[prod]}x</strong> ${prod}</li>`;
+                });
+            } else {
+                htmlDetail += `<li>Aucun détail disponible (anciennes ventes)</li>`;
+            }
+            htmlDetail += `</ul>`;
+
+            subRow.innerHTML = `
+                <td colspan="3" style="background-color: #09121a; border: 1px solid #1f3141; padding: 15px;">
+                    <span style="color:#00ffcc; font-size:12px; font-weight:bold; text-transform:uppercase; display:block; margin-bottom:8px;">📦 Détail des articles vendus :</span>
+                    ${htmlDetail}
+                </td>
+            `;
+            corpsTableau.appendChild(subRow);
         });
 
         if (caTotalElement) caTotalElement.textContent = `${cumulCA} $`;
@@ -317,7 +354,6 @@ window.remiseAZeroFiches = function() {
     }
 };
 
-// Lancement automatique au chargement de la page admin
 if (document.getElementById('panel-suivi-employes') || document.getElementById('corps-tableau-ca')) {
     chargerComptaAdmin();
     afficherListeComptes();

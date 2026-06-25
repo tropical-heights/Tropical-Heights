@@ -1,11 +1,11 @@
 // ====== INFRASTRUCTURE DE BASE (LOCALSTORAGE) ======
-let comptes = JSON.parse(localStorage.getItem('comptes'));
-if (!comptes || comptes.length === 0) {
-    comptes = [
+// On initialise les comptes UNIQUEMENT s'ils n'existent pas du tout
+if (!localStorage.getItem('comptes')) {
+    const comptesParDefaut = [
         { username: "Boss", password: "admin123", role: "admin" },
         { username: "Employe1", password: "tropical2026", role: "employe" }
     ];
-    localStorage.setItem('comptes', JSON.stringify(comptes));
+    localStorage.setItem('comptes', JSON.stringify(comptesParDefaut));
 }
 
 // ====== GESTION DE LA CONNEXION (INDEX.HTML) ======
@@ -17,7 +17,8 @@ if (loginForm) {
         const usernameInput = document.getElementById('username').value.trim();
         const passwordInput = document.getElementById('password').value.trim();
 
-        const fecthComptes = JSON.parse(localStorage.getItem('comptes')) || comptes;
+        // On récupère TOUJOURS ce qui est stocké actuellement pour ne rien perdre
+        const fecthComptes = JSON.parse(localStorage.getItem('comptes'));
         const compteTrouve = fecthComptes.find(c => c.username === usernameInput && c.password === passwordInput);
 
         if (compteTrouve) {
@@ -32,7 +33,6 @@ if (loginForm) {
         }
     });
 }
-
 // ====== GESTION DES VENTES (EMPLOYE.HTML) ======
 const saleForm = document.getElementById('saleForm');
 if (saleForm) {

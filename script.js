@@ -1,5 +1,4 @@
 // ====== INFRASTRUCTURE DE BASE (LOCALSTORAGE) ======
-// Initialisation des comptes par défaut si la mémoire est vide
 let comptes = JSON.parse(localStorage.getItem('comptes'));
 if (!comptes || comptes.length === 0) {
     comptes = [
@@ -18,15 +17,11 @@ if (loginForm) {
         const usernameInput = document.getElementById('username').value.trim();
         const passwordInput = document.getElementById('password').value.trim();
 
-        // Re-charger les comptes mis à jour
         const fecthComptes = JSON.parse(localStorage.getItem('comptes')) || comptes;
         const compteTrouve = fecthComptes.find(c => c.username === usernameInput && c.password === passwordInput);
 
         if (compteTrouve) {
-            // Sauvegarde de la session active
             localStorage.setItem('compteConnecte', JSON.stringify(compteTrouve));
-            
-            // Redirection selon le rôle
             if (compteTrouve.username === "Boss" || compteTrouve.role === "admin") {
                 window.location.href = 'admin.html';
             } else {
@@ -41,7 +36,6 @@ if (loginForm) {
 // ====== GESTION DES VENTES (EMPLOYE.HTML) ======
 const saleForm = document.getElementById('saleForm');
 if (saleForm) {
-    // Afficher l'identifiant de l'employé connecté sur sa page
     const employeConnecte = JSON.parse(localStorage.getItem('compteConnecte'));
     const nomEmployeData = document.getElementById('nom-employe');
     if (nomEmployeData && employeConnecte) {
@@ -59,7 +53,6 @@ if (saleForm) {
         const totalVente = itemPrix * quantity;
         const nomEmploye = employeConnecte ? employeConnecte.username : "Inconnu";
 
-        // 1. Sauvegarde dans les fiches de compta des employés
         let fichesCompta = JSON.parse(localStorage.getItem('fichesCompta')) || {};
         if (!fichesCompta[nomEmploye]) {
             fichesCompta[nomEmploye] = { ventes: 0, ca: 0 };
@@ -68,7 +61,6 @@ if (saleForm) {
         fichesCompta[nomEmploye].ca += totalVente;
         localStorage.setItem('fichesCompta', JSON.stringify(fichesCompta));
 
-        // 2. Ajout dans l'historique/archives globales du Boss
         let archivesGlobales = JSON.parse(localStorage.getItem('archivesGlobales')) || [];
         const dateActuelle = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
         archivesGlobales.unshift({
@@ -106,7 +98,6 @@ function chargerComptaAdmin() {
             corpsTableau.appendChild(row);
         });
 
-        // Mettre à jour le badge du Chiffre d'Affaires global en haut du panel
         if (caTotalElement) {
             caTotalElement.textContent = `${cumulCA} $`;
         }
@@ -120,7 +111,7 @@ function chargerComptaAdmin() {
         } else {
             archivesGlobales.forEach(archive => {
                 const p = document.createElement('p');
-               p.style.color = "#ecf0f1";
+                p.style.color = "#ecf0f1";
                 p.style.margin = "5px 0";
                 p.style.fontSize = "14px";
                 p.innerHTML = archive.texte;
@@ -130,15 +121,13 @@ function chargerComptaAdmin() {
     }
 }
 
-// Fonction de remise à zéro de la compta des employés
 window.remiseAZeroFiches = function() {
-    if (confirm("Voulez-vous vraiment remettre à zéro toutes les fiches des employés pour la nouvelle semaine ? (L'historique restera détaillé)")) {
+    if (confirm("Voulez-vous vraiment remettre à zéro toutes les fiches des employés ?")) {
         localStorage.removeItem('fichesCompta');
         chargerComptaAdmin();
     }
 };
 
-// Lancement automatique de l'affichage si on est sur la page Admin
 if (document.getElementById('panel-suivi-employes')) {
     chargerComptaAdmin();
 }

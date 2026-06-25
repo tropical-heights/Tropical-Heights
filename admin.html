@@ -27,7 +27,8 @@
                 <p class="stat-number">3</p>
             </div>
         </div>
-<section class="admin-section">
+
+        <section class="admin-section">
             <h3>Commandes de Stocks Reçues (Entreprises)</h3>
             <table>
                 <thead>
@@ -39,10 +40,10 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="adminOrdersList">
-                    </tbody>
+                <tbody id="adminOrdersList"></tbody>
             </table>
         </section>
+
         <section class="admin-section">
             <h3>Configuration des Articles & Prix</h3>
             <form id="addPricesForm">
@@ -62,26 +63,11 @@
                     </tr>
                 </thead>
                 <tbody id="adminItemsList">
-                    <tr>
-                        <td>Entrée Simple</td>
-                        <td>500 $</td>
-                        <td><button class="btn-delete">Supprimer</button></td>
-                    </tr>
-                    <tr>
-                        <td>Entrée VIP</td>
-                        <td>1 500 $</td>
-                        <td><button class="btn-delete">Supprimer</button></td>
-                    </tr>
-                    <tr>
-                        <td>Cocktail Tropical</td>
-                        <td>200 $</td>
-                        <td><button class="btn-delete">Supprimer</button></td>
-                    </tr>
-                </tbody>
+                    </tbody>
             </table>
         </section>
 
-       <section class="admin-section">
+        <section class="admin-section">
             <h3>Création et Gestion des Accès (Employés & Clients)</h3>
             <form id="addAccountForm" style="margin-bottom: 20px;">
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
@@ -104,212 +90,159 @@
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="adminAccountsList">
-                    </tbody>
+                <tbody id="adminAccountsList"></tbody>
             </table>
         </section>
 
-    <script>
-      // Fonction pour afficher les articles depuis le localStorage
-function afficherArticlesAdmin() {
-    const articles = JSON.parse(localStorage.getItem('articles')) || [];
-    const tbody = document.getElementById('adminItemsList');
-    tbody.innerHTML = ''; // On vide le tableau avant de réafficher
+        <section class="admin-section" id="panel-suivi-employes" style="background: #1e252f; color: white; padding: 20px; border-radius: 8px; margin-top: 30px; font-family: sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+            <h2 style="color: #00ffcc; border-bottom: 2px solid #34495e; padding-bottom: 10px; margin-top: 0;">
+                📊 Suivi des Employés & CA de la Semaine
+            </h2>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left;">
+                <thead>
+                    <tr style="background: #2c3e50; color: #ecf0f1;">
+                        <th style="padding: 12px; border: 1px solid #34495e;">Identifiant Employé</th>
+                        <th style="padding: 12px; border: 1px solid #34495e; text-align: center;">Nombre de Ventes</th>
+                        <th style="padding: 12px; border: 1px solid #34495e; text-align: right;">CA Semaine</th>
+                    </tr>
+                </thead>
+                <tbody id="corps-tableau-ca">
+                    </tbody>
+            </table>
 
-    articles.forEach((article, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${article.nom}</td>
-            <td>${article.prix} $</td>
-            <td><button class="btn-delete" onclick="supprimerArticle(${index})">Supprimer</button></td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
-// Fonction pour ajouter ou modifier un article
-document.getElementById('addPricesForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const name = document.getElementById('newName').value;
-    const price = parseInt(document.getElementById('newPrice').value);
-
-    let articles = JSON.parse(localStorage.getItem('articles')) || [];
-    
-    // On ajoute le nouvel article au tableau
-    articles.push({ nom: name, prix: price });
-    
-    // On sauvegarde dans le localStorage
-    localStorage.setItem('articles', JSON.stringify(articles));
-
-    // On rafraîchit l'affichage et on vide le formulaire
-    afficherArticlesAdmin();
-    document.getElementById('addPricesForm').reset();
-});
-
-// Fonction pour supprimer un article
-function supprimerArticle(index) {
-    let articles = JSON.parse(localStorage.getItem('articles')) || [];
-    articles.splice(index, 1); // Retire l'article sélectionné
-    localStorage.setItem('articles', JSON.stringify(articles));
-    afficherArticlesAdmin(); // Rafraîchit le tableau
-}
-
-// Charger les articles au démarrage de la page admin
-afficherArticlesAdmin();
-// Fonction pour afficher les comptes
-function afficherComptes() {
-    const comptes = JSON.parse(localStorage.getItem('comptes')) || [];
-    const tbody = document.getElementById('adminAccountsList');
-    tbody.innerHTML = '';
-
-    comptes.forEach((compte, index) => {
-        // On n'affiche pas le compte Boss pour éviter de le supprimer par erreur
-        if (compte.username === "Boss") return;
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${compte.username}</td>
-            <td><span style="color: ${compte.role === 'employe' ? '#00ffcc' : '#ffaa00'}">${compte.role.toUpperCase()}</span></td>
-            <td style="color: #00ffcc;">Autorisé</td>
-            <td><button class="btn-delete" onclick="supprimerCompte(${index})">Révoquer l'accès</button></td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
-// Fonction pour ajouter un compte
-document.getElementById('addAccountForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const username = document.getElementById('newUsername').value;
-    const password = document.getElementById('newPassword').value;
-    const role = document.getElementById('newRole').value;
-
-    let comptes = JSON.parse(localStorage.getItem('comptes')) || [];
-    
-    // Vérifier si l'identifiant existe déjà
-    if (comptes.some(c => c.username === username)) {
-        alert("Cet identifiant est déjà utilisé !");
-        return;
-    }
-
-    comptes.push({ username, password, role });
-    localStorage.setItem('comptes', JSON.stringify(comptes));
-
-    afficherComptes();
-    document.getElementById('addAccountForm').reset();
-});
-
-// Fonction pour supprimer un compte
-function supprimerCompte(index) {
-    let comptes = JSON.parse(localStorage.getItem('comptes')) || [];
-    comptes.splice(index, 1);
-    localStorage.setItem('comptes', JSON.stringify(comptes));
-    afficherComptes();
-}
-
-// Ajouter cet appel tout en bas pour charger les comptes au démarrage
-afficherComptes();
-    // Fonction pour afficher les commandes reçues des clients
-function afficherCommandesReçues() {
-    const commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
-    const tbody = document.getElementById('adminOrdersList');
-    tbody.innerHTML = '';
-
-    if (commandes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#aaa;">Aucune commande pour le moment.</td></tr>';
-        return;
-    }
-
-    commandes.forEach((cmd, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><strong>${cmd.entreprise}</strong></td>
-            <td>${cmd.article}</td>
-            <td>${cmd.quantite}</td>
-            <td><span style="color: ${cmd.statut === 'En attente' ? '#ffaa00' : '#00ffcc'}">${cmd.statut}</span></td>
-            <td>
-                <button style="background: #00ffcc; color: #1a1c29; padding: 5px 10px; font-size: 12px; width:auto; border:none; border-radius:4px;" onclick="livrerCommande(${index})">Marquer comme Livrée</button>
-                <button class="btn-delete" style="padding: 5px 10px; font-size: 12px;" onclick="supprimerCommande(${index})">Supprimer</button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
-// Fonction pour passer le statut en "Livrée"
-function livrerCommande(index) {
-    let commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
-    commandes[index].statut = "Livrée / Terminée";
-    localStorage.setItem('commandesGlobales', JSON.stringify(commandes));
-    afficherCommandesReçues();
-}
-
-// Fonction pour supprimer une commande de la liste
-function supprimerCommande(index) {
-    let commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
-    commandes.splice(index, 1);
-    localStorage.setItem('commandesGlobales', JSON.stringify(commandes));
-    afficherCommandesReçues();
-}
-
-// IMPORTANT : Appeler la fonction au chargement de la page admin
-afficherCommandesReçues();
-    </script>
-<div id="panel-suivi-employes" style="background: #1e252f; color: white; padding: 20px; border-radius: 8px; margin-top: 30px; font-family: sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-    
-    <h2 style="color: #00ffcc; border-bottom: 2px solid #34495e; padding-bottom: 10px; margin-top: 0;">
-        📊 Suivi des Employés & CA de la Semaine
-    </h2>
-    
-    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left;">
-        <thead>
-            <tr style="background: #2c3e50; color: #ecf0f1;">
-                <th style="padding: 12px; border: 1px solid #34495e;">Identifiant Employé</th>
-                <th style="padding: 12px; border: 1px solid #34495e; text-align: center;">Nombre de Ventes</th>
-                <th style="padding: 12px; border: 1px solid #34495e; text-align: right;">CA Semaine</th>
-            </tr>
-        </thead>
-        <tbody id="corps-tableau-ca">
-            </tbody>
-    </table>
-
-    <div style="margin-top: 20px; text-align: right;">
-        <button onclick="remiseAZeroFiches()" style="background: #ff4757; color: white; border: none; padding: 12px 20px; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.2s;">
-            🔄 Reset fiches (Remise à zéro compta employés)
-        </button>
-    </div>
-
-    <div style="margin-top: 30px;">
-        <h3 style="color: #a29bfe; margin-bottom: 10px;">📁 Archives Générales (Historique Sauvegardé pour le Boss)</h3>
-        <div id="archives-globales" style="max-height: 200px; overflow-y: auto; background: #11141a; padding: 15px; border-radius: 5px; border: 1px solid #2c3e50;">
+            <div style="margin-top: 20px; text-align: right;">
+                <button onclick="remiseAZeroFiches()" style="background: #ff4757; color: white; border: none; padding: 12px 20px; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.2s;">
+                    🔄 Reset fiches (Remise à zéro compta employés)
+                </button>
             </div>
-    </div>
-</div>
-<div id="panel-suivi-employes" style="background: #1e252f; color: white; padding: 20px; border-radius: 8px; margin-top: 30px; font-family: sans-serif;">
-        <h2 style="color: #00ffcc; border-bottom: 2px solid #34495e; padding-bottom: 10px;">📊 Suivi des Employés & CA de la Semaine</h2>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left;">
-            <thead>
-                <tr style="background: #2c3e50; color: #ecf0f1;">
-                    <th style="padding: 12px; border: 1px solid #34495e;">Identifiant Employé</th>
-                    <th style="padding: 12px; border: 1px solid #34495e; text-align: center;">Nombre de Ventes</th>
-                    <th style="padding: 12px; border: 1px solid #34495e; text-align: right;">CA Semaine</th>
-                </tr>
-            </thead>
-            <tbody id="corps-tableau-ca">
-                </tbody>
-        </table>
-        <div style="margin-top: 20px; text-align: right;">
-            <button onclick="remiseAZeroFiches()" style="background: #ff4757; color: white; border: none; padding: 12px 20px; font-weight: bold; border-radius: 5px; cursor: pointer;">
-                🔄 Reset fiches (Remise à zéro compta employés)
-            </button>
-        </div>
-        <div style="margin-top: 30px;">
-            <h3 style="color: #a29bfe; margin-bottom: 10px;">📁 Archives Générales (Historique Sauvegardé)</h3>
-            <div id="archives-globales" style="max-height: 200px; overflow-y: auto; background: #11141a; padding: 15px; border-radius: 5px;"></div>
-        </div>
+
+            <div style="margin-top: 30px;">
+                <h3 style="color: #a29bfe; margin-bottom: 10px;">📁 Archives Générales (Historique Sauvegardé pour le Boss)</h3>
+                <div id="archives-globales" style="max-height: 200px; overflow-y: auto; background: #11141a; padding: 15px; border-radius: 5px; border: 1px solid #2c3e50;">
+                    </div>
+            </div>
+        </section>
     </div>
 
-</body>
-</html>
+    <script src="./script.js"></script>
+    <script>
+        // Fonctions internes pour la page Admin
+        function afficherArticlesAdmin() {
+            const articles = JSON.parse(localStorage.getItem('articles')) || [];
+            const tbody = document.getElementById('adminItemsList');
+            tbody.innerHTML = '';
+            articles.forEach((article, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${article.nom}</td>
+                    <td>${article.prix} $</td>
+                    <td><button class="btn-delete" onclick="supprimerArticle(${index})">Supprimer</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        document.getElementById('addPricesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('newName').value;
+            const price = parseInt(document.getElementById('newPrice').value);
+            let articles = JSON.parse(localStorage.getItem('articles')) || [];
+            articles.push({ nom: name, prix: price });
+            localStorage.setItem('articles', JSON.stringify(articles));
+            afficherArticlesAdmin();
+            document.getElementById('addPricesForm').reset();
+        });
+
+        function supprimerArticle(index) {
+            let articles = JSON.parse(localStorage.getItem('articles')) || [];
+            articles.splice(index, 1);
+            localStorage.setItem('articles', JSON.stringify(articles));
+            afficherArticlesAdmin();
+        }
+
+        function afficherComptes() {
+            const comptes = JSON.parse(localStorage.getItem('comptes')) || [];
+            const tbody = document.getElementById('adminAccountsList');
+            tbody.innerHTML = '';
+            comptes.forEach((compte, index) => {
+                if (compte.username === "Boss") return;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${compte.username}</td>
+                    <td><span style="color: ${compte.role === 'employe' ? '#00ffcc' : '#ffaa00'}">${compte.role.toUpperCase()}</span></td>
+                    <td style="color: #00ffcc;">Autorisé</td>
+                    <td><button class="btn-delete" onclick="supprimerCompte(${index})">Révoquer l'accès</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        document.getElementById('addAccountForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const role = document.getElementById('newRole').value;
+            let comptes = JSON.parse(localStorage.getItem('comptes')) || [];
+            if (comptes.some(c => c.username === username)) {
+                alert("Cet identifiant est déjà utilisé !");
+                return;
+            }
+            comptes.push({ username, password, role });
+            localStorage.setItem('comptes', JSON.stringify(comptes));
+            afficherComptes();
+            document.getElementById('addAccountForm').reset();
+        });
+
+        function supprimerCompte(index) {
+            let comptes = JSON.parse(localStorage.getItem('comptes')) || [];
+            comptes.splice(index, 1);
+            localStorage.setItem('comptes', JSON.stringify(comptes));
+            afficherComptes();
+        }
+
+        function afficherCommandesReçues() {
+            const commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+            const tbody = document.getElementById('adminOrdersList');
+            tbody.innerHTML = '';
+            if (commandes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#aaa;">Aucune commande pour le moment.</td></tr>';
+                return;
+            }
+            commandes.forEach((cmd, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${cmd.entreprise}</strong></td>
+                    <td>${cmd.article}</td>
+                    <td>${cmd.quantite}</td>
+                    <td><span style="color: ${cmd.statut === 'En attente' ? '#ffaa00' : '#00ffcc'}">${cmd.statut}</span></td>
+                    <td>
+                        <button style="background: #00ffcc; color: #1a1c29; padding: 5px 10px; font-size: 12px; width:auto; border:none; border-radius:4px;" onclick="livrerCommande(${index})">Marquer comme Livrée</button>
+                        <button class="btn-delete" style="padding: 5px 10px; font-size: 12px;" onclick="supprimerCommande(${index})">Supprimer</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function livrerCommande(index) {
+            let commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+            commandes[index].statut = "Livrée / Terminée";
+            localStorage.setItem('commandesGlobales', JSON.stringify(commandes));
+            afficherCommandesReçues();
+        }
+
+        function supprimerCommande(index) {
+            let commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+            commandes.splice(index, 1);
+            localStorage.setItem('commandesGlobales', JSON.stringify(commandes));
+            afficherCommandesReçues();
+        }
+
+        // Chargement initial
+        afficherArticlesAdmin();
+        afficherComptes();
+        afficherCommandesReçues();
+    </script>
 </body>
 </html>

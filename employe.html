@@ -4,109 +4,127 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tropical Heights - Espace Employé</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: #0b131a;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            color: #f5f6fa;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            background: #121f2b;
+            border: 1px solid #1f3141;
+            border-radius: 10px;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+        }
+        h1 {
+            color: #00ffcc;
+            text-align: center;
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .sub {
+            text-align: center;
+            color: #a5b1c2;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00ffcc;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background: #09121a;
+            border: 1px solid #22374a;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #00ffcc;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #00ffcc 0%, #00e6b8 100%);
+            color: #09121a;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+        .footer-links {
+            margin-top: 25px;
+            text-align: center;
+        }
+        .btn-link {
+            color: #a5b1c2;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .btn-link:hover {
+            color: #fff;
+        }
+    </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <header>
-            <h2>Tropical Heights</h2>
-            <p>Espace Employé — Enregistrement des Ventes</p>
-        </header>
 
-        <section class="form-section">
-            <h3>Nouvelle Vente</h3>
-            <form id="saleForm">
-                <div class="input-group">
-                    <label for="item">Article vendu</label>
-                    <select id="item" required>
-                        <option value="">-- Choisir un article --</option>
-                    </select>
-                </div>
+    <div class="container">
+        <h1>Tropical Heights</h1>
+        <div class="sub">Espace Employé — Enregistrement des Ventes</div>
 
-                <div class="input-group">
-                    <label for="quantity">Quantité</label>
-                    <input type="number" id="quantity" min="1" value="1" required>
-                </div>
+        <form id="saleForm">
+            <div class="form-group">
+                <label for="itemSelect">Article vendu :</label>
+                <select id="itemSelect" class="form-control" required>
+                    <option value="500">Entrée Simple (500$)</option>
+                    <option value="1500">Entrée VIP (1500$)</option>
+                    <option value="200">Cocktail Tropical (200$)</option>
+                </select>
+            </div>
 
-                <div class="input-group">
-                    <label for="client">Nom du client (ou ID)</label>
-                    <input type="text" id="client" placeholder="Ex: Jean Paul ou ID 42" required>
-                </div>
+            <div class="form-group">
+                <label for="quantity">Quantité :</label>
+                <input type="number" id="quantity" class="form-control" value="1" min="1" required>
+            </div>
 
-                <button type="submit">Valider la vente</button>
-            </form>
-        </section>
+            <div class="form-group">
+                <label>Nom du client (ou ID) :</label>
+                <input type="text" class="form-control" placeholder="Ex: Calisma">
+            </div>
 
-        <section class="history-section">
-            <h3>Mes ventes du jour</h3>
-            <table id="salesTable">
-                <thead>
-                    <tr>
-                        <th>Article</th>
-                        <th>Quantité</th>
-                        <th>Client</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody id="salesList">
-                    </tbody>
-            </table>
-        </section>
+            <button type="submit" class="btn-submit">Valider la vente</button>
+        </form>
+
+        <div class="footer-links">
+            <a href="index.html" class="btn-link">Déconnexion / Retour</a>
+        </div>
     </div>
 
     <script src="script.js"></script>
-
-    <script>
-    // Fonction pour charger dynamiquement la carte du Tropical Heights
-    function chargerCarteEmploye() {
-        const articles = JSON.parse(localStorage.getItem('articles')) || [];
-        const select = document.getElementById('item');
-        
-        select.innerHTML = '<option value="">-- Choisir un article --</option>';
-
-        articles.forEach(article => {
-            const option = document.createElement('option');
-            option.value = article.nom;
-            option.dataset.prix = article.prix; 
-            option.textContent = `${article.nom} (${article.prix}$)`;
-            select.appendChild(option);
-        });
-    }
-
-    // Gestion de la validation d'une vente
-    document.getElementById('saleForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const select = document.getElementById('item');
-        const itemNom = select.value;
-        const itemPrix = parseInt(select.options[select.selectedIndex].dataset.prix);
-        const quantity = parseInt(document.getElementById('quantity').value);
-        const client = document.getElementById('client').value;
-        
-        const total = itemPrix * quantity;
-
-        // 🔥 CONNEXION AVEC LE PANEL BOSS : Envoie les données !
-        if (typeof enregistrerUneVente === "function") {
-            enregistrerUneVente(total);
-        }
-
-        // Ajouter la ligne dans le tableau des ventes visuel de l'employé
-        const salesList = document.getElementById('salesList');
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${itemNom}</td>
-            <td>${quantity}</td>
-            <td>${client}</td>
-            <td style="font-weight: bold; color: #2ecc71;">${total}$</td>
-        `;
-        salesList.appendChild(row);
-
-        // Réinitialiser le formulaire pour la prochaine vente
-        document.getElementById('saleForm').reset();
-    });
-
-    // Charger la carte au démarrage
-    chargerCarteEmploye();
-    </script>
 </body>
 </html>

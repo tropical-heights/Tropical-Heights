@@ -8,6 +8,17 @@ if (!comptes || comptes.length === 0) {
     localStorage.setItem('comptes', JSON.stringify(comptes));
 }
 
+// ====== ARTICLES PAR DÉFAUT SI LA MÉMOIRE EST VIDE ======
+let articlesBoutique = JSON.parse(localStorage.getItem('articlesBoutique'));
+if (!articlesBoutique || articlesBoutique.length === 0) {
+    articlesBoutique = [
+        { nom: "Entrée Simple", prix: 500 },
+        { nom: "Entrée VIP", prix: 1500 },
+        { nom: "Cocktail Tropical", prix: 200 }
+    ];
+    localStorage.setItem('articlesBoutique', JSON.stringify(articlesBoutique));
+}
+
 // ====== GESTION DE LA CONNEXION (INDEX.HTML) ======
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
@@ -41,16 +52,23 @@ if (saleForm) {
         nomEmployeData.textContent = employeConnecte.username;
     }
 
+    // Charger dynamiquement les articles dans le select de l'employé
+    const itemSelect = document.getElementById('itemSelect');
+    if (itemSelect) {
+        itemSelect.innerHTML = '';
+        articlesBoutique.forEach(art => {
+            const opt = document.createElement('option');
+            opt.value = art.prix;
+            opt.textContent = `${art.nom} (${art.prix}$)`;
+            itemSelect.appendChild(opt);
+        });
+    }
+
     saleForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const itemSelect = document.getElementById('itemSelect');
         const quantityInput = document.getElementById('quantity');
-        
-        if (!itemSelect || !quantityInput) {
-            alert("Erreur : Vérifie que ton formulaire HTML a bien id='itemSelect' et id='quantity'");
-            return;
-        }
+        if (!itemSelect || !quantityInput) return;
 
         const itemNom = itemSelect.options[itemSelect.selectedIndex].text;
         const itemPrix = parseInt(itemSelect.value) || 0;
@@ -59,7 +77,6 @@ if (saleForm) {
         const totalVente = itemPrix * quantity;
         const nomEmploye = employeConnecte ? employeConnecte.username : "Employe1";
 
-        // Sauvegarde de la compta
         let fichesCompta = JSON.parse(localStorage.getItem('fichesCompta')) || {};
         if (!fichesCompta[nomEmploye]) {
             fichesCompta[nomEmploye] = { ventes: 0, ca: 0 };
@@ -68,7 +85,6 @@ if (saleForm) {
         fichesCompta[nomEmploye].ca += totalVente;
         localStorage.setItem('fichesCompta', JSON.stringify(fichesCompta));
 
-        // Sauvegarde de l'historique global
         let archivesGlobales = JSON.parse(localStorage.getItem('archivesGlobales')) || [];
         const dateActuelle = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
         archivesGlobales.unshift({
@@ -86,7 +102,6 @@ const registerForm = document.getElementById('registerForm');
 if (registerForm) {
     registerForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        
         const userField = document.getElementById('newUsername');
         const passField = document.getElementById('newPassword');
         const roleField = document.getElementById('newRole');
@@ -97,11 +112,6 @@ if (registerForm) {
         const newRegPass = passField.value.trim();
         const newRegRole = roleField ? roleField.value : "employe";
 
-        if(!newRegUser || !newRegPass) {
-            alert("Veuillez remplir tous les champs !");
-            return;
-        }
-
         let listeComptes = JSON.parse(localStorage.getItem('comptes')) || [];
         if (listeComptes.some(c => c.username.toLowerCase() === newRegUser.toLowerCase())) {
             alert("Cet utilisateur existe déjà !");
@@ -111,20 +121,17 @@ if (registerForm) {
         listeComptes.push({ username: newRegUser, password: newRegPass, role: newRegRole });
         localStorage.setItem('comptes', JSON.stringify(listeComptes));
         
-        alert(`Le compte de ${newRegUser} (${newRegRole}) a été créé !`);
+        alert(`Le compte de ${newRegUser} a été créé !`);
         registerForm.reset();
-        
-        // Rafraîchit la liste des comptes affichée
         afficherListeComptes();
     });
 }
 
-// ====== FONCTION DE GESTION DES COMPTES (REVISU / MODIF / SUPPR) ======
+// ====== FONCTIONS EN PLUS POUR LES COMPTES ET ARTICLES (S'INJECTENT SANS CHANGER LE HTML) ======
 function afficherListeComptes() {
     const formAdmin = document.getElementById('registerForm');
     if (!formAdmin) return;
 
-    // On cherche si la zone de liste existe déjà, sinon on la crée sous le formulaire
     let zoneListe = document.getElementById('liste-gestion-comptes');
     if (!zoneListe) {
         zoneListe = document.createElement('div');
@@ -136,25 +143,14 @@ function afficherListeComptes() {
     }
 
     const listeComptes = JSON.parse(localStorage.getItem('comptes')) || [];
-    
     zoneListe.innerHTML = `<h4 style="margin: 0 0 15px 0; color: #00ffcc; font-size: 15px; text-transform: uppercase;">👥 Liste des comptes actifs</h4>`;
 
     listeComptes.forEach((compte, index) => {
         const item = document.createElement('div');
-        item.style.display = 'flex';
-        item.style.justify = 'space-between';
-        item.style.alignItems = 'center';
-        item.style.background = '#09121a';
-        item.style.padding = '10px';
-        item.style.borderRadius = '6px';
-        item.style.marginBottom = '10px';
-        item.style.fontSize = '14px';
-        item.style.border = '1px solid #1f3141';
-
+        item.style = 'display: flex; justify-content: space-between; align-items: center; background: #09121a; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 14px; border: 1px solid #1f3141;';
         item.innerHTML = `
             <div>
-                <strong style="color: #fff;">${compte.username}</strong> 
-                <span style="color: #a5b1c2; font-size: 12px;">(${compte.role})</span><br>
+                <strong style="color: #fff;">${compte.username}</strong> <span style="color: #a5b1c2; font-size: 12px;">(${compte.role})</span><br>
                 <span style="color: #4b6584; font-size: 12px;">MDP: ${compte.password}</span>
             </div>
             <div style="display: flex; gap: 8px;">
@@ -166,27 +162,108 @@ function afficherListeComptes() {
     });
 }
 
-// Action de modification du mot de passe
+function initialiserGestionArticlesAdmin() {
+    const panelAdmin = document.getElementById('panel-suivi-employes');
+    if (!panelAdmin) return;
+
+    let zoneArticles = document.getElementById('carte-gestion-articles-auto');
+    if (!zoneArticles) {
+        zoneArticles = document.createElement('div');
+        zoneArticles.id = 'carte-gestion-articles-auto';
+        zoneArticles.className = 'card';
+        zoneArticles.style.background = '#121f2b';
+        zoneArticles.style.border = '1px solid #1f3141';
+        zoneArticles.style.borderRadius = '10px';
+        zoneArticles.style.padding = '25px';
+        zoneArticles.style.boxShadow = '0 6px 18px rgba(0, 0, 0, 0.4)';
+        zoneArticles.style.boxSizing = 'border-box';
+        
+        // On l'injecte juste avant le journal d'activité
+        const grid = document.querySelector('.dashboard-grid');
+        if (grid) {
+            grid.appendChild(zoneArticles);
+        }
+    }
+
+    zoneArticles.innerHTML = `
+        <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 18px; color: #ffffff; border-bottom: 1px solid #1f3141; padding-bottom: 12px;">🛍️ Gestion des Articles & Prix</h3>
+        <div style="margin-bottom: 15px;">
+            <label style="display:block; margin-bottom:5px; color:#a5b1c2; font-size:14px;">Nom du produit :</label>
+            <input type="text" id="addArtName" class="form-control" placeholder="Ex: Bière" style="margin-bottom:10px;">
+            <label style="display:block; margin-bottom:5px; color:#a5b1c2; font-size:14px;">Prix ($) :</label>
+            <input type="number" id="addArtPrice" class="form-control" placeholder="Ex: 150" min="0" style="margin-bottom:15px;">
+            <button onclick="ajouterNouvelItem()" class="btn-submit" style="padding:10px;">Ajouter à la boutique</button>
+        </div>
+        <div id="liste-items-boutique" style="margin-top:15px; border-top:1px solid #1f3141; paddingTop:10px;"></div>
+    `;
+    afficherListeItemsAdmin();
+}
+
+window.ajouterNouvelItem = function() {
+    const nameIn = document.getElementById('addArtName');
+    const priceIn = document.getElementById('addArtPrice');
+    if (!nameIn || !priceIn) return;
+
+    const nom = nameIn.value.trim();
+    const prix = parseInt(priceIn.value) || 0;
+
+    if (!nom) { alert("Indique un nom !"); return; }
+
+    let listeArts = JSON.parse(localStorage.getItem('articlesBoutique')) || [];
+    listeArts.push({ nom: nom, prix: prix });
+    localStorage.setItem('articlesBoutique', JSON.stringify(listeArts));
+    articlesBoutique = listeArts;
+
+    nameIn.value = '';
+    priceIn.value = '';
+    alert(`Article "${nom}" ajouté !`);
+    afficherListeItemsAdmin();
+};
+
+function afficherListeItemsAdmin() {
+    const divListe = document.getElementById('liste-items-boutique');
+    if (!divListe) return;
+
+    const listeArts = JSON.parse(localStorage.getItem('articlesBoutique')) || [];
+    divListe.innerHTML = '<h5 style="color:#00ffcc; margin:10px 0;">Articles actuels :</h5>';
+
+    listeArts.forEach((art, index) => {
+        const row = document.createElement('div');
+        row.style = 'display:flex; justify-content:space-between; align-items:center; background:#09121a; padding:8px; border-radius:6px; margin-bottom:5px; border:1px solid #1f3141; font-size:13px;';
+        row.innerHTML = `
+            <span><strong>${art.nom}</strong> - <span style="color:#00ffcc">${art.prix}$</span></span>
+            <button onclick="supprimerItem(${index})" style="background:#fc5c65; color:white; border:none; padding:3px 6px; border-radius:4px; cursor:pointer;">❌</button>
+        `;
+        divListe.appendChild(row);
+    });
+}
+
 window.modifierMdp = function(index) {
     let listeComptes = JSON.parse(localStorage.getItem('comptes')) || [];
-    const nouveauMdp = prompt(`Entrez le nouveau mot de passe pour ${listeComptes[index].username} :`, listeComptes[index].password);
-    
+    const nouveauMdp = prompt(`Nouveau mot de passe pour ${listeComptes[index].username} :`, listeComptes[index].password);
     if (nouveauMdp && nouveauMdp.trim() !== "") {
         listeComptes[index].password = nouveauMdp.trim();
         localStorage.setItem('comptes', JSON.stringify(listeComptes));
-        alert("Mot de passe modifié avec succès !");
         afficherListeComptes();
     }
 };
 
-// Action de suppression d'un compte
 window.supprimerCompte = function(index) {
     let listeComptes = JSON.parse(localStorage.getItem('comptes')) || [];
-    if (confirm(`Supprimer définitivement l'accès de ${listeComptes[index].username} ?`)) {
+    if (confirm(`Supprimer l'accès de ${listeComptes[index].username} ?`)) {
         listeComptes.splice(index, 1);
         localStorage.setItem('comptes', JSON.stringify(listeComptes));
-        alert("Compte supprimé !");
         afficherListeComptes();
+    }
+};
+
+window.supprimerItem = function(index) {
+    let listeArts = JSON.parse(localStorage.getItem('articlesBoutique')) || [];
+    if (confirm(`Supprimer l'article "${listeArts[index].nom}" ?`)) {
+        listeArts.splice(index, 1);
+        localStorage.setItem('articlesBoutique', JSON.stringify(listeArts));
+        articlesBoutique = listeArts;
+        afficherListeItemsAdmin();
     }
 };
 
@@ -225,9 +302,7 @@ function chargerComptaAdmin() {
         } else {
             archivesGlobales.forEach(archive => {
                 const p = document.createElement('p');
-                p.style.color = "#ecf0f1";
-                p.style.margin = "5px 0";
-                p.style.fontSize = "14px";
+                p.style.color = "#ecf0f1"; p.style.margin = "5px 0"; p.style.fontSize = "14px";
                 p.innerHTML = archive.texte;
                 zoneArchives.appendChild(p);
             });
@@ -245,5 +320,6 @@ window.remiseAZeroFiches = function() {
 // Lancement automatique au chargement de la page admin
 if (document.getElementById('panel-suivi-employes') || document.getElementById('corps-tableau-ca')) {
     chargerComptaAdmin();
-    afficherListeComptes(); // On lance l'affichage de la gestion des comptes ici !
+    afficherListeComptes();
+    initialiserGestionArticlesAdmin();
 }

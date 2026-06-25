@@ -43,3 +43,82 @@ document.getElementById('loginForm')?.addEventListener('submit', function(e) {
         errorMessage.textContent = "Identifiant ou mot de passe incorrect, ou accès non autorisé.";
     }
 });
+// ====== GESTION DYNAMIQUE DES EMPLOYÉS & DU CA POUR LE BOSS ======
+
+// 1. Fonction pour afficher le récapitulatif de TOUS les comptes actifs
+function chargerPanelAdminCalculs() {
+    let caEmployes = JSON.parse(localStorage.getItem('caEmployes')) || {};
+    let historiqueGlobal = JSON.parse(localStorage.getItem('historiqueGlobal')) || [];
+    
+    // Récupérer le tableau HTML
+    let corpsTableau = document.getElementById('corps-tableau-ca');
+    if (corpsTableau) {
+        corpsTableau.innerHTML = ""; // On vide le tableau avant de le remplir
+        
+        // Prendre tous les identifiants qui ont un CA enregistré
+        let identifiants = Object.keys(caEmployes);
+        
+        if (identifiants.length === 0) {
+            corpsTableau.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#888;">Aucun employé n'a encore enregistré de vente cette semaine.</td></tr>`;
+        } else {
+            identifiants.forEach(identifiant => {
+                let caActuel = caEmployes[identifiant] || 0;
+                
+                // On compte combien de ventes cet employé a fait au total
+                let nombreVentes = historiqueGlobal.filter(vente => vente.employe === identifiant).length;
+                
+                let ligne = `
+                    <tr>
+                        <td><strong style="color: #3498db;">${identifiant}</strong></td>
+                        <td style="text-align: center; font-weight: bold;">${nombreVentes} vente(s)</td>
+                        <td style="color: #2ecc71; font-weight: bold; text-align: right;">${caActuel.toLocaleString()} $</td>
+                    </tr>
+                `;
+                corpsTableau.innerHTML += ligne;
+            });
+        }
+    }
+    
+    // 2. Affichage du Volet Archives (Historique Global pour le Boss)
+    let voletArchives = document.getElementById('archives-globales');
+    if (voletArchives) {
+        if (historiqueGlobal.length === 0) {
+            voletArchives.innerHTML = "<p style='color: #888;'>Aucune archive disponible pour le moment.</p>";
+        } else {
+            voletArchives.innerHTML = "";
+            // On affiche du plus récent au plus ancien
+            historiqueGlobal.slice().reverse().forEach(vente => {
+                let dateFormatee = new Date(vente.date).toLocaleDateString('fr-FR', {
+                    day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit'
+                });
+                let ligneArchive = `
+                    <div style="border-bottom: 1px solid #333; padding: 5px 0; font-size: 0.9em; display: flex; justify-content: space-between;">
+                        <span><span style="color: #9b59b6;">[${dateFormatee}]</span> <strong>${vente.employe}</strong></span>
+                        <span style="color: #2ecc71; font-weight: bold;">+ ${vente.montant.toLocaleString()} $</span>
+                    </div>
+                `;
+                voletArchives.innerHTML += ligneArchive;
+            });
+        }
+    }
+}
+
+// 3. Fonction RESET : Remet à zéro les fiches mais GARDE l'historique global
+function remiseAZeroFiches() {
+    if (confirm("⚠️ Es-tu sûr de vouloir remettre à zéro la compta de TOUS les comptes ? (Le volet d'archives restera conservé pour toi)")) {
+        // On vide uniquement les CA de la semaine
+        localStorage.removeItem('caEmployes');
+        
+        // On rafraîchit l'affichage pour voir le tableau se vider
+        chargerPanelAdminCalculs();
+        
+        alert("🔄 Les fiches hebdomadaires ont été réinitialisées !");
+    }
+}
+
+// 4. Lancement automatique au chargement de la page admin
+document.addEventListener("DOMContentLoaded", () => {
+    if (document.getElementById('corps-tableau-ca')) {
+        chargerPanelAdminCalculs();
+    }
+});

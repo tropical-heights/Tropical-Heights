@@ -113,8 +113,82 @@ if (registerForm) {
         
         alert(`Le compte de ${newRegUser} (${newRegRole}) a été créé !`);
         registerForm.reset();
+        
+        // Rafraîchit la liste des comptes affichée
+        afficherListeComptes();
     });
 }
+
+// ====== FONCTION DE GESTION DES COMPTES (REVISU / MODIF / SUPPR) ======
+function afficherListeComptes() {
+    const formAdmin = document.getElementById('registerForm');
+    if (!formAdmin) return;
+
+    // On cherche si la zone de liste existe déjà, sinon on la crée sous le formulaire
+    let zoneListe = document.getElementById('liste-gestion-comptes');
+    if (!zoneListe) {
+        zoneListe = document.createElement('div');
+        zoneListe.id = 'liste-gestion-comptes';
+        zoneListe.style.marginTop = '25px';
+        zoneListe.style.borderTop = '1px solid #1f3141';
+        zoneListe.style.paddingTop = '15px';
+        formAdmin.parentNode.appendChild(zoneListe);
+    }
+
+    const listeComptes = JSON.parse(localStorage.getItem('comptes')) || [];
+    
+    zoneListe.innerHTML = `<h4 style="margin: 0 0 15px 0; color: #00ffcc; font-size: 15px; text-transform: uppercase;">👥 Liste des comptes actifs</h4>`;
+
+    listeComptes.forEach((compte, index) => {
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.justify = 'space-between';
+        item.style.alignItems = 'center';
+        item.style.background = '#09121a';
+        item.style.padding = '10px';
+        item.style.borderRadius = '6px';
+        item.style.marginBottom = '10px';
+        item.style.fontSize = '14px';
+        item.style.border = '1px solid #1f3141';
+
+        item.innerHTML = `
+            <div>
+                <strong style="color: #fff;">${compte.username}</strong> 
+                <span style="color: #a5b1c2; font-size: 12px;">(${compte.role})</span><br>
+                <span style="color: #4b6584; font-size: 12px;">MDP: ${compte.password}</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button onclick="modifierMdp(${index})" style="background: #4b6584; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">✏️</button>
+                <button onclick="supprimerCompte(${index})" style="background: #fc5c65; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;" ${compte.username === 'Boss' ? 'disabled style="opacity:0.3; cursor:default;"' : ''}>❌</button>
+            </div>
+        `;
+        zoneListe.appendChild(item);
+    });
+}
+
+// Action de modification du mot de passe
+window.modifierMdp = function(index) {
+    let listeComptes = JSON.parse(localStorage.getItem('comptes')) || [];
+    const nouveauMdp = prompt(`Entrez le nouveau mot de passe pour ${listeComptes[index].username} :`, listeComptes[index].password);
+    
+    if (nouveauMdp && nouveauMdp.trim() !== "") {
+        listeComptes[index].password = nouveauMdp.trim();
+        localStorage.setItem('comptes', JSON.stringify(listeComptes));
+        alert("Mot de passe modifié avec succès !");
+        afficherListeComptes();
+    }
+};
+
+// Action de suppression d'un compte
+window.supprimerCompte = function(index) {
+    let listeComptes = JSON.parse(localStorage.getItem('comptes')) || [];
+    if (confirm(`Supprimer définitivement l'accès de ${listeComptes[index].username} ?`)) {
+        listeComptes.splice(index, 1);
+        localStorage.setItem('comptes', JSON.stringify(listeComptes));
+        alert("Compte supprimé !");
+        afficherListeComptes();
+    }
+};
 
 // ====== AFFICHAGE DE LA COMPTA SUR TON PANEL ======
 function chargerComptaAdmin() {
@@ -168,7 +242,8 @@ window.remiseAZeroFiches = function() {
     }
 };
 
-// Charge le tableau si on est sur l'espace admin
+// Lancement automatique au chargement de la page admin
 if (document.getElementById('panel-suivi-employes') || document.getElementById('corps-tableau-ca')) {
     chargerComptaAdmin();
+    afficherListeComptes(); // On lance l'affichage de la gestion des comptes ici !
 }

@@ -82,15 +82,14 @@ if (saleForm) {
 }
 
 // ====== AJOUTER / GÉRER LES ACCÈS (ADMIN.HTML) ======
-const registerForm = document.getElementById('registerForm') || document.querySelector('form[action*="register"]') || document.querySelector('.admin-container form');
+const registerForm = document.getElementById('registerForm');
 if (registerForm) {
     registerForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // On essaie de choper tes inputs, peu importe leur ID
-        const userField = document.getElementById('newUsername') || registerForm.querySelector('input[type="text"]');
-        const passField = document.getElementById('newPassword') || registerForm.querySelector('input[type="password"]');
-        const roleField = document.getElementById('newRole') || registerForm.querySelector('select');
+        const userField = document.getElementById('newUsername');
+        const passField = document.getElementById('newPassword');
+        const roleField = document.getElementById('newRole');
 
         if (!userField || !passField) return;
 
@@ -119,9 +118,9 @@ if (registerForm) {
 
 // ====== AFFICHAGE DE LA COMPTA SUR TON PANEL ======
 function chargerComptaAdmin() {
-    const corpsTableau = document.getElementById('corps-tableau-ca') || document.querySelector('tbody');
-    const zoneArchives = document.getElementById('archives-globales') || document.querySelector('.archives, .journal');
-    const caTotalElement = document.getElementById('ca-total') || document.querySelector('.total, #total');
+    const corpsTableau = document.getElementById('corps-tableau-ca');
+    const zoneArchives = document.getElementById('archives-globales');
+    const caTotalElement = document.getElementById('ca-total');
 
     if (corpsTableau) {
         const fichesCompta = JSON.parse(localStorage.getItem('fichesCompta')) || {};
@@ -134,9 +133,9 @@ function chargerComptaAdmin() {
 
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td style="padding: 12px; border: 1px solid #34495e;"><strong>${employe}</strong></td>
-                <td style="padding: 12px; border: 1px solid #34495e; text-align: center;">${data.ventes}</td>
-                <td style="padding: 12px; border: 1px solid #34495e; text-align: right; color: #00ffcc; font-weight: bold;">${data.ca} $</td>
+                <td style="padding: 12px; border: 1px solid #1f3141;"><strong>${employe}</strong></td>
+                <td style="padding: 12px; border: 1px solid #1f3141; text-align: center;">${data.ventes}</td>
+                <td style="padding: 12px; border: 1px solid #1f3141; text-align: right; color: #00ffcc; font-weight: bold;">${data.ca} $</td>
             `;
             corpsTableau.appendChild(row);
         });
@@ -148,7 +147,7 @@ function chargerComptaAdmin() {
         const archivesGlobales = JSON.parse(localStorage.getItem('archivesGlobales')) || [];
         zoneArchives.innerHTML = '';
         if (archivesGlobales.length === 0) {
-            zoneArchives.innerHTML = '<p style="color: #666; margin: 0;">Aucun historique enregistré.</p>';
+            zoneArchives.innerHTML = '<p style="color: #4b6584; margin: 0; font-size: 14px; font-style: italic;">Aucun flux de données détecté pour le moment.</p>';
         } else {
             archivesGlobales.forEach(archive => {
                 const p = document.createElement('p');
@@ -169,5 +168,7 @@ window.remiseAZeroFiches = function() {
     }
 };
 
-// Se lance peu importe les ID trouvés dans ton HTML
-chargerComptaAdmin();
+// Charge le tableau si on est sur l'espace admin
+if (document.getElementById('panel-suivi-employes') || document.getElementById('corps-tableau-ca')) {
+    chargerComptaAdmin();
+}

@@ -74,28 +74,30 @@
     <script>
 document.getElementById('formEntreprise').addEventListener('submit', function(e) {
     e.preventDefault();
-    const user = document.getElementById('entUser').value.trim().toLowerCase();
-    const pass = document.getElementById('entPass').value.trim();
+    const inputUser = document.getElementById('entUser').value.trim().toLowerCase();
+    const inputPass = document.getElementById('entPass').value.trim();
 
-    // 1. On récupère TOUTES les clés possibles que ton script utilise pour stocker les comptes
-    const listeComptes = JSON.parse(localStorage.getItem('comptesUtilisateurs')) || 
-                         JSON.parse(localStorage.getItem('utilisateurs')) || 
-                         JSON.parse(localStorage.getItem('utilisateursList')) || [];
+    // Récupération de la base de données de tes comptes
+    const baseComptes = JSON.parse(localStorage.getItem('comptesUtilisateurs')) || 
+                        JSON.parse(localStorage.getItem('utilisateurs')) || [];
     
-    // 2. On cherche le compte correspondant à l'identifiant et au mot de passe
-    const compteTrouve = listeComptes.find(u => 
-        u.username.toLowerCase() === user && 
-        u.password === pass
-    );
+    // Recherche ultra-flexible qui s'adapte aux noms des clés de ton script d'origine
+    const compteTrouve = baseComptes.find(u => {
+        // Trouver l'identifiant (gère u.username ou u.nom, etc.)
+        const nomCompte = (u.username || u.nom || u.identifiant || "").toLowerCase();
+        
+        // Trouver le mot de passe (gère u.password ou u.mdp)
+        const mdpCompte = u.password || u.mdp || u.passwordInput || "";
+
+        return nomCompte === inputUser && String(mdpCompte) === inputPass;
+    });
 
     if (compteTrouve) {
-        // On valide la connexion et on mémorise le nom
-        localStorage.setItem('entrepriseConnectee', compteTrouve.username);
+        // Connexion réussie : on garde le nom d'origine pour les commandes
+        localStorage.setItem('entrepriseConnectee', compteTrouve.username || compteTrouve.nom || inputUser);
         window.location.href = 'commandes.html';
     } else {
-        // 3. Si vraiment aucun compte ne correspond, on affiche ce qu'il y a en mémoire pour comprendre
-        console.log("Comptes trouvés en base :", listeComptes);
-        alert("Identifiant ou mot de passe incorrect.\n\nAssurez-vous de taper exactement ce que le Boss a écrit dans le Panel.");
+        alert("Connexion impossible.\n\nVérifiez que l'identifiant et le mot de passe correspondent exactement à la fiche créée sur le Panel Admin.");
     }
 });
 </script>

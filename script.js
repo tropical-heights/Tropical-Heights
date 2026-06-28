@@ -19,21 +19,53 @@ if (!articlesBoutique || articlesBoutique.length === 0) {
     localStorage.setItem('articlesBoutique', JSON.stringify(articlesBoutique));
 }
 
-// ====== MISE À JOUR DYNAMIQUE DU NOM "LUCKY PLUCKER" ======
-function appliquerNomEnseigne() {
-    // Change le gros titre dans la sidebar de l'admin s'il existe
+// ====== APPLICATION DYNAMIQUE DU THÈME ORANGE ET DU NOM ======
+function appliquerThemeEtNom() {
+    // 1. Changement des noms de l'enseigne
     const sidebarTitle = document.querySelector('.sidebar h2');
     if (sidebarTitle) sidebarTitle.textContent = "Lucky Plucker";
 
-    // Change le titre principal H1 (sur l'accueil ou l'espace employé)
     const mainTitle = document.querySelector('h1');
     if (mainTitle && (mainTitle.textContent.includes("Tropical") || mainTitle.textContent.includes("Lucky"))) {
         mainTitle.textContent = "Lucky Plucker";
     }
 
-    // Change le titre de l'onglet du navigateur
     if (document.title.includes("Tropical Heights")) {
         document.title = document.title.replace("Tropical Heights", "Lucky Plucker");
+    }
+
+    // 2. Injection du style Orange / Ambre sans toucher au HTML
+    let styleOrange = document.getElementById('theme-orange-style');
+    if (!styleOrange) {
+        styleOrange = document.createElement('style');
+        styleOrange.id = 'theme-orange-style';
+        styleOrange.innerHTML = `
+            /* Remplacement des touches de couleur par des tons Orange / Ambre */
+            .sidebar h2, label, .status-badge, #ca-total, .amount { color: #ff9f43 !important; }
+            
+            .status-badge { 
+                background: rgba(255, 159, 67, 0.1) !important; 
+                border-color: rgba(255, 159, 67, 0.3) !important; 
+            }
+            
+            .sidebar-menu li a:hover, .sidebar-menu li a.active { 
+                border-color: #ff9f43 !important;
+                background: linear-gradient(90deg, #2c1a10 0%, #1a110b 100%) !important;
+            }
+            
+            .btn-submit { 
+                background: linear-gradient(90deg, #ff9f43 0%, #ff7675 100%) !important; 
+                color: #0b131a !important; 
+            }
+            
+            .btn-submit:hover {
+                background: linear-gradient(90deg, #ffb167 0%, #ff8a88 100%) !important;
+            }
+            
+            /* Ajustement pour les boutons du tableau */
+            input:focus, select:focus { border-color: #ff9f43 !important; }
+        `;
+        document.head.appendChild(styleOrange);
     }
 }
 
@@ -70,13 +102,11 @@ if (saleForm) {
         nomEmployeData.textContent = employeConnecte.username;
     }
 
-    // Modifier le sous-texte de l'employé pour afficher Lucky Plucker
     const subText = document.querySelector('.sub');
     if (subText && employeConnecte) {
         subText.innerHTML = `Espace Employé — Enregistrement des Ventes (Connecté en tant que : <span id="nom-employe" style="color:#fff; font-weight:bold;">${employeConnecte.username}</span>)`;
     }
 
-    // Charger dynamiquement les articles dans le select de l'employé
     const itemSelect = document.getElementById('itemSelect');
     if (itemSelect) {
         itemSelect.innerHTML = '';
@@ -181,7 +211,7 @@ function afficherListeComptes() {
     }
 
     const listeComptes = JSON.parse(localStorage.getItem('comptes')) || [];
-    zoneListe.innerHTML = `<h4 style="margin: 0 0 15px 0; color: #00ffcc; font-size: 15px; text-transform: uppercase;">👥 Liste des comptes actifs</h4>`;
+    zoneListe.innerHTML = `<h4 style="margin: 0 0 15px 0; color: #ff9f43; font-size: 15px; text-transform: uppercase;">👥 Liste des comptes actifs</h4>`;
 
     listeComptes.forEach((compte, index) => {
         const item = document.createElement('div');
@@ -258,7 +288,7 @@ window.ajouterNouvelItem = function() {
     articlesBoutique = listeArts;
 
     nameIn.value = ''; priceIn.value = ''; priceUsineIn.value = '';
-    alert(`Article "${nom}" ajouté (Vente: ${prix}$, Usine: ${prixUsine}$)!`);
+    alert(`Article "${nom}" ajouté !`);
     afficherListeItemsAdmin();
 };
 
@@ -267,7 +297,7 @@ function afficherListeItemsAdmin() {
     if (!divListe) return;
 
     const listeArts = JSON.parse(localStorage.getItem('articlesBoutique')) || [];
-    divListe.innerHTML = '<h5 style="color:#00ffcc; margin:10px 0;">Articles actuels :</h5>';
+    divListe.innerHTML = '<h5 style="color:#ff9f43; margin:10px 0;">Articles actuels :</h5>';
 
     listeArts.forEach((art, index) => {
         const row = document.createElement('div');
@@ -315,7 +345,6 @@ function chargerComptaAdmin() {
     const zoneArchives = document.getElementById('archives-globales');
     const caTotalElement = document.getElementById('ca-total');
 
-    // Met à jour le sous-titre de la boîte de CA global
     const caText = document.querySelector('.ca-box p');
     if (caText) caText.textContent = "Chiffre d'Affaires Global Lucky Plucker";
 
@@ -325,7 +354,7 @@ function chargerComptaAdmin() {
             <th>Identifiant Collaborateur</th>
             <th style="text-align: center;">Volumes Ventes</th>
             <th style="text-align: right;">Total Généré</th>
-            <th style="text-align: right; color:#00ffcc;">Total Bénéfices</th>
+            <th style="text-align: right; color:#ff9f43;">Total Bénéfices</th>
         `;
     }
 
@@ -351,7 +380,7 @@ function chargerComptaAdmin() {
                 <td style="padding: 14px; border: 1px solid #1f3141;">👉 <strong>${employe}</strong> <span style="font-size:11px; color:#a5b1c2;">(détail)</span></td>
                 <td style="padding: 14px; border: 1px solid #1f3141; text-align: center;">${data.ventes}</td>
                 <td style="padding: 14px; border: 1px solid #1f3141; text-align: right; font-weight: bold; color: #ffffff;">${data.ca} $</td>
-                <td style="padding: 14px; border: 1px solid #1f3141; text-align: right; font-weight: bold; color: #00ffcc;">${beneficeEmploye} $</td>
+                <td style="padding: 14px; border: 1px solid #1f3141; text-align: right; font-weight: bold; color: #ff9f43;">${beneficeEmploye} $</td>
             `;
             corpsTableau.appendChild(row);
 
@@ -371,7 +400,7 @@ function chargerComptaAdmin() {
 
             subRow.innerHTML = `
                 <td colspan="4" style="background-color: #09121a; border: 1px solid #1f3141; padding: 15px;">
-                    <span style="color:#00ffcc; font-size:12px; font-weight:bold; text-transform:uppercase; display:block; margin-bottom:8px;">📦 Articles vendus :</span>
+                    <span style="color:#ff9f43; font-size:12px; font-weight:bold; text-transform:uppercase; display:block; margin-bottom:8px;">📦 Articles vendus :</span>
                     ${htmlDetail}
                 </td>
             `;
@@ -406,7 +435,7 @@ window.remiseAZeroFiches = function() {
 
 // Lancement global au chargement du DOM
 document.addEventListener("DOMContentLoaded", function() {
-    appliquerNomEnseigne();
+    appliquerThemeEtNom();
     if (document.getElementById('panel-suivi-employes') || document.getElementById('corps-tableau-ca')) {
         chargerComptaAdmin();
         afficherListeComptes();

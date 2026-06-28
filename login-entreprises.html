@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tropical Heights - Connexion Partenaires</title>
+    <style>
+        body {
+            background-color: #0b131a;
+            font-family: 'Segoe UI', sans-serif;
+            color: #f5f6fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-box {
+            background: #121f2b;
+            border: 1px solid #1f3141;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h2 { color: #ffaa00; margin-bottom: 25px; text-transform: uppercase; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; margin-bottom: 8px; color: #a5b1c2; font-size: 14px; }
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #09121a;
+            border: 1px solid #22374a;
+            border-radius: 6px;
+            color: white;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #ffaa00 0%, #e69900 100%);
+            color: #09121a;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+        .back-link { display: block; margin-top: 20px; color: #a5b1c2; text-decoration: none; font-size: 13px; }
+        .back-link:hover { color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <h2>Espace Entreprises</h2>
+        <form id="formEntreprise">
+            <div class="form-group">
+                <label>Nom de l'entreprise :</label>
+                <input type="text" id="entUser" required placeholder="Ex: Bennys">
+            </div>
+            <div class="form-group">
+                <label>Mot de passe clé :</label>
+                <input type="password" id="entPass" required placeholder="••••••••">
+            </div>
+            <button type="submit">Se connecter au Terminal</button>
+        </form>
+        <a href="index.html" class="back-link">← Retour à l'accueil</a>
+    </div>
+
+    <script>
+        document.getElementById('formEntreprise').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const user = document.getElementById('entUser').value;
+            const pass = document.getElementById('entPass').value;
+
+            // Récupérer les comptes créés par le Boss sur l'admin
+            const comptes = JSON.parse(localStorage.getItem('comptesUtilisateurs')) || [];
+            
+            // Vérification stricte du compte entreprise
+            const compteTrouve = comptes.find(u => u.username === user && u.password === pass && u.role === 'entreprise');
+
+            if (compteTrouve) {
+                localStorage.setItem('entrepriseConnectee', compteTrouve.username);
+                window.location.href = 'commandes.html'; // Envoi direct aux commandes
+            } else {
+                alert("Identifiants incorrects ou ce compte n'est pas configuré comme 'Entreprise' !");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -495,3 +495,32 @@ if (document.getElementById('panel-suivi-employes')) {
     // Actualise dès qu'une vente ou action a lieu
     window.addEventListener('click', () => { setTimeout(afficherCommandesPourAdmin, 200); });
 }
+// ====== GESTION INTERCEPT CONNEXION : RÔLE ENTREPRISE ======
+document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+    // On laisse le script principal vérifier le mot de passe d'abord.
+    // On attend un tout petit instant (50ms) pour lire ce que le script principal a validé.
+    setTimeout(() => {
+        const sessionActive = JSON.parse(localStorage.getItem('sessionActive'));
+        
+        // Si la session est active et que c'est une entreprise
+        if (sessionActive && sessionActive.role === 'entreprise') {
+            // Sauvegarder le nom de l'entreprise pour le formulaire de commande
+            localStorage.setItem('entrepriseConnectee', sessionActive.username);
+            
+            // Rediriger immédiatement vers la page des commandes
+            window.location.href = 'commandes.html';
+        }
+    }, 50);
+});
+
+// ====== SÉCURISATION ET AUTOMATISATION SUR COMMANDES.HTML ======
+// Si on est sur la page commandes.html, on récupère le nom de l'entreprise connectée
+if (window.location.pathname.includes('commandes.html')) {
+    const entrepriseNom = localStorage.getItem('entrepriseConnectee') || "Entreprise Partenaire";
+    
+    // On modifie la fonction d'envoi de commande existante pour utiliser ce nom automatiquement
+    document.getElementById('orderForm')?.addEventListener('submit', function() {
+        // Ce code s'exécute en arrière-plan pour injecter le vrai nom du compte connecté
+        window.entrepriseNomAutomatique = entrepriseNom;
+    }, true);
+}

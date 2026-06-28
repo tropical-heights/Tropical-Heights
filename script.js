@@ -409,14 +409,22 @@ function chargerComptaAdmin() {
         });
     }
 
-    // ====== AJOUT DU TOTAL DES COMMANDES ENTREPRISES AU CA GLOBAL ======
+    // ====== MODIFICATION ICI : AJOUT DU TOTAL DES COMMANDES ENTREPRISES AU CA GLOBAL ======
     const commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+    const listeArtsBoutique = JSON.parse(localStorage.getItem('articlesBoutique')) || articlesBoutique;
+
     commandes.forEach(cmd => {
-        // Optionnel : si tu veux ajouter seulement le prix des articles connus de la boutique
-        // Ici, on récupère le prix de l'article s'il existe en boutique, sinon on met 0 par sécurité
-        const artBoutique = articlesBoutique.find(a => a.nom === cmd.article);
-        const prixUnitaire = artBoutique ? artBoutique.prix : 0;
-        cumulCA += (prixUnitaire * (parseInt(cmd.quantite) || 0));
+        if (cmd.details && Array.isArray(cmd.details)) {
+            cmd.details.forEach(p => {
+                const artBoutique = listeArtsBoutique.find(a => a.nom === p.article);
+                const prixUnitaire = artBoutique ? artBoutique.prix : 0;
+                cumulCA += (prixUnitaire * p.quantite);
+            });
+        } else if (cmd.article && cmd.quantite) {
+            const artBoutique = listeArtsBoutique.find(a => a.nom === cmd.article);
+            const prixUnitaire = artBoutique ? artBoutique.prix : 0;
+            cumulCA += (prixUnitaire * (parseInt(cmd.quantite) || 0));
+        }
     });
 
     if (caTotalElement) caTotalElement.textContent = `${cumulCA} $`;
@@ -440,7 +448,7 @@ function chargerComptaAdmin() {
 window.remiseAZeroFiches = function() {
     if (confirm("Remettre à zéro toutes les fiches ?")) {
         localStorage.removeItem('fichesCompta');
-        localStorage.removeItem('commandesGlobales'); // AJOUT : Enlève aussi les commandes entreprises
+        localStorage.removeItem('commandesGlobales'); 
         chargerComptaAdmin();
     }
 };
@@ -456,28 +464,67 @@ document.addEventListener("DOMContentLoaded", function() {
         initialiserGestionArticlesAdmin();
     }
 });
+
 // ====== SUIVI DES COMMANDES ENTREPRISES (PANEL BOSS) ======
 function afficherCommandesPourAdmin() {
     const tbody = document.getElementById('corps-tableau-commandes');
-    if (!tbody) return; // Si on n'est pas sur la page admin, on arrête
+    if (!tbody) return; 
+
+    // Remplacement des entêtes pour inclure "Montant Total" et la colonne "Actions"
+    const tableHeader = tbody.closest('table')?.querySelector('thead tr');
+    if (tableHeader) {
+        tableHeader.innerHTML = `
+            <th>Entreprise</th>
+            <th>Article</th>
+            <th style="text-align: center;">Quantité</th>
+            <th style="text-align: center;">Montant Total</th>
+            <th style="text-align: center;">Statut</th>
+            <th style="text-align: right;">Actions</th>
+        `;
+    }
 
     const commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+    const listeArtsBoutique = JSON.parse(localStorage.getItem('articlesBoutique')) || articlesBoutique;
     tbody.innerHTML = '';
 
     if (commandes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#4b6584; font-style:italic;">Aucune commande en attente.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#4b6584; font-style:italic;">Aucune commande en attente.</td></tr>';
         return;
     }
 
     commandes.forEach((cmd, index) => {
+        let totalCommande = 0;
+        let articleAffiche = cmd.article || "";
+
+        // Calcul du montant total
+        if (cmd.details && Array.isArray(cmd.details)) {
+            let detailTexte = [];
+            cmd.details.forEach(p => {
+                const artBoutique = listeArtsBoutique.find(a => a.nom === p.article);
+                const prixUnitaire = artBoutique ? artBoutique.prix : 0;
+                totalCommande += (prixUnitaire * p.quantite);
+                detailTexte.push(`${p.quantite}x ${p.article}`);
+            });
+            articleAffiche = detailTexte.join(', ');
+        } else if (cmd.article && cmd.quantite) {
+            const artBoutique = listeArtsBoutique.find(a => a.nom === cmd.article);
+            const prixUnitaire = artBoutique ? artBoutique.prix : 0;
+            totalCommande = prixUnitaire * parseInt(cmd.quantite);
+            articleAffiche = cmd.article;
+        }
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${cmd.entreprise}</strong></td>
-            <td>${cmd.article}</td>
-            <td style="text-align: center;">${cmd.quantite}</td>
-            <td style="text-align: center;"><span style="color: ${cmd.statut === 'En attente' ? '#ffaa00' : '#00ffcc'}; font-weight:bold;">${cmd.statut}</span></td>
+            <td>${articleAffiche}</td>
+            <td style="text-align: center;">${cmd.quantite || 'Groupé'}</td>
+            <td style="text-align: center; font-weight: bold; color: #ff9f43;">${totalCommande} $</td>
+            <td style="text-align: center;"><span style="color: ${cmd.statut === 'En attente' || cmd.statut === 'Attente Paiement' ? '#ffaa00' : '#00ffcc'}; font-weight:bold;">${cmd.statut}</span></td>
             <td style="text-align: right;">
-                ${cmd.statut === 'En attente' ? `<button onclick="validerCommande(${index})" style="background:#00ffcc; color:#09121a; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold;">Livrer 👍</button>` : `<span style="color:#a5b1c2; font-size:12px;">Terminé</span>`}
+                <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
+                    ${cmd.statut === 'En attente' || cmd.statut === 'Attente Paiement' ? `<button onclick="validerCommande(${index})" style="background:#00ffcc; color:#09121a; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold;">Livrer 👍</button>` : `<span style="color:#a5b1c2; font-size:12px;">Terminé</span>`}
+                    <button onclick="supprimerCommandeTroll(${index})" style="background:#fc5c65; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">❌</button>
+                </div>
             </td>
         `;
         tbody.appendChild(tr);
@@ -502,6 +549,18 @@ window.validerCommande = function(index) {
     if(typeof chargerComptaAdmin === 'function') chargerComptaAdmin(); 
 };
 
+// ====== AJOUT DE LA FONCTION POUR SUPPRIMER LES COMMANDES TROLLS ======
+window.supprimerCommandeTroll = function(index) {
+    if (confirm("Supprimer cette commande ?")) {
+        let commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+        commandes.splice(index, 1);
+        localStorage.setItem('commandesGlobales', JSON.stringify(commandes));
+        
+        afficherCommandesPourAdmin();
+        if(typeof chargerComptaAdmin === 'function') chargerComptaAdmin(); 
+    }
+};
+
 // Injection automatique dans le chargement existant de l'admin
 if (document.getElementById('panel-suivi-employes')) {
     // Lance l'affichage au démarrage
@@ -509,6 +568,7 @@ if (document.getElementById('panel-suivi-employes')) {
     // Actualise dès qu'une vente ou action a lieu
     window.addEventListener('click', () => { setTimeout(afficherCommandesPourAdmin, 200); });
 }
+
 // ====== GESTION INTERCEPT CONNEXION : RÔLE ENTREPRISE ======
 document.getElementById('loginForm')?.addEventListener('submit', function(e) {
     // On laisse le script principal vérifier le mot de passe d'abord.
@@ -519,8 +579,6 @@ document.getElementById('loginForm')?.addEventListener('submit', function(e) {
         // Si la session est active et que c'est une entreprise
         if (sessionActive && sessionActive.role === 'entreprise') {
             // Sauvegarder le nom de l'entreprise pour le formulaire de commande
-            localStorage.setItem('entrepriseConnectee', sessionActive.username);
-            
             // Rediriger immédiatement vers la page des commandes
             window.location.href = 'commandes.html';
         }

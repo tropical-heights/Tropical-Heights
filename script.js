@@ -34,7 +34,7 @@ function appliquerThemeEtNom() {
         document.title = document.title.replace("Tropical Heights", "Lucky Plucker");
     }
 
-    // 2. Injection du style Orange / Ambre sans toucher au HTML
+    // 2. Injection du style Orange / Ambre sans toucher au HTML (Adapté aussi pour l'index.html)
     let styleOrange = document.getElementById('theme-orange-style');
     if (!styleOrange) {
         styleOrange = document.createElement('style');
@@ -42,6 +42,9 @@ function appliquerThemeEtNom() {
         styleOrange.innerHTML = `
             /* Remplacement des touches de couleur par des tons Orange / Ambre */
             .sidebar h2, label, .status-badge, #ca-total, .amount { color: #ff9f43 !important; }
+            
+            /* Ciblage spécifique du titre H1 de la page de connexion index.html */
+            .login-container h1, .login-box h1, h1 { color: #ff9f43 !important; }
             
             .status-badge { 
                 background: rgba(255, 159, 67, 0.1) !important; 
@@ -53,12 +56,14 @@ function appliquerThemeEtNom() {
                 background: linear-gradient(90deg, #2c1a10 0%, #1a110b 100%) !important;
             }
             
-            .btn-submit { 
+            /* Boutons de soumission (Boutique + Page Connexion) */
+            .btn-submit, #loginForm button, button[type="submit"] { 
                 background: linear-gradient(90deg, #ff9f43 0%, #ff7675 100%) !important; 
                 color: #0b131a !important; 
+                border: none !important;
             }
             
-            .btn-submit:hover {
+            .btn-submit:hover, #loginForm button:hover, button[type="submit"]:hover {
                 background: linear-gradient(90deg, #ffb167 0%, #ff8a88 100%) !important;
             }
             
@@ -571,28 +576,18 @@ if (document.getElementById('panel-suivi-employes')) {
 
 // ====== GESTION INTERCEPT CONNEXION : RÔLE ENTREPRISE ======
 document.getElementById('loginForm')?.addEventListener('submit', function(e) {
-    // On laisse le script principal vérifier le mot de passe d'abord.
-    // On attend un tout petit instant (50ms) pour lire ce que le script principal a validé.
     setTimeout(() => {
         const sessionActive = JSON.parse(localStorage.getItem('sessionActive'));
-        
-        // Si la session est active et que c'est une entreprise
         if (sessionActive && sessionActive.role === 'entreprise') {
-            // Sauvegarder le nom de l'entreprise pour le formulaire de commande
-            // Rediriger immédiatement vers la page des commandes
             window.location.href = 'commandes.html';
         }
     }, 50);
 });
 
 // ====== SÉCURISATION ET AUTOMATISATION SUR COMMANDES.HTML ======
-// Si on est sur la page commandes.html, on récupère le nom de l'entreprise connectée
 if (window.location.pathname.includes('commandes.html')) {
     const entrepriseNom = localStorage.getItem('entrepriseConnectee') || "Entreprise Partenaire";
-    
-    // On modifie la fonction d'envoi de commande existante pour utiliser ce nom automatiquement
     document.getElementById('orderForm')?.addEventListener('submit', function() {
-        // Ce code s'exécute en arrière-plan pour injecter le vrai nom du compte connecté
         window.entrepriseNomAutomatique = entrepriseNom;
     }, true);
 }

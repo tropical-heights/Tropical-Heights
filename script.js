@@ -223,11 +223,11 @@ function afficherListeComptes() {
         item.style = 'display: flex; justify-content: space-between; align-items: center; background: #09121a; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 14px; border: 1px solid #1f3141;';
         item.innerHTML = `
             <div>
-                <strong style="color: #fff;">${compte.username}</strong> <span style="color: #a5b1c2; font-size: 12px;">(${compte.role})</span><br>
-                <span style="color: #4b6584; font-size: 12px;">MDP: ${compte.password}</span>
+                <strong style="color: #fff;">${compte.username}</strong> <span style="color: #ff9f43; font-size: 12px;">(${compte.role})</span><br>
+                <span style="color: #ff9f43; font-size: 12px;">MDP: ${compte.password}</span>
             </div>
             <div style="display: flex; gap: 8px;">
-                <button onclick="modifierMdp(${index})" style="background: #4b6584; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">✏️</button>
+                <button onclick="modifierMdp(${index})" style="background: #ff9f43; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">✏️</button>
                 <button onclick="supprimerCompte(${index})" style="background: #fc5c65; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;" ${compte.username === 'Boss' ? 'disabled style="opacity:0.3; cursor:default;"' : ''}>❌</button>
             </div>
         `;

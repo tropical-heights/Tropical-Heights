@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tropical Heights - Espace Commandes Entreprises</title>
+    <title>Lucky Plucker - Espace Commandes Entreprises</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="dashboard-container">
         <header>
-            <h2>Tropical Heights</h2>
+            <h2>Lucky Plucker</h2>
             <p>Espace Partenaires — Passer une commande de stock</p>
         </header>
 
@@ -19,7 +19,7 @@
                 <div class="input-group">
                     <label for="orderItem">Article souhaité</label>
                     <select id="orderItem" required>
-                        </select>
+                    </select>
                 </div>
 
                 <div class="input-group">
@@ -27,7 +27,7 @@
                     <input type="number" id="orderQuantity" min="1" value="10" required>
                 </div>
 
-                <button type="submit">Envoyer la commande au Tropical Heights</button>
+                <button type="submit">Envoyer la commande au Lucky Plucker</button>
             </form>
         </section>
 
@@ -53,7 +53,63 @@
     </div>
 
 <script>
-// Modification du nom de l'enseigne
+// ====== INJECTION STYLE ORANGE & ADAPTATION DU NOM ======
+function appliquerThemeEtNom() {
+    // Remplacement des mentions textuelles "Tropical Heights" par "Lucky Plucker" au cas où
+    const headerTitle = document.querySelector('header h2');
+    if (headerTitle) headerTitle.textContent = "Lucky Plucker";
+
+    const subTextPage = document.querySelector('header p');
+    if (subTextPage && subTextPage.textContent.includes("Tropical Heights")) {
+        subTextPage.textContent = subTextPage.textContent.replace("Tropical Heights", "Lucky Plucker");
+    }
+
+    if (document.title.includes("Tropical Heights")) {
+        document.title = document.title.replace("Tropical Heights", "Lucky Plucker");
+    }
+
+    // Injection dynamique des styles Orange / Ambre
+    let styleOrange = document.getElementById('theme-orange-style');
+    if (!styleOrange) {
+        styleOrange = document.createElement('style');
+        styleOrange.id = 'theme-orange-style';
+        styleOrange.innerHTML = `
+            /* Couleurs des textes principaux et labels */
+            header h2, h3, label, th, td { color: #ff9f43 !important; }
+            
+            /* Inputs et listes déroulantes */
+            input, select { 
+                background: #09121a !important; 
+                color: #fff !important; 
+                border: 1px solid #1f3141 !important; 
+            }
+            input:focus, select:focus { 
+                border-color: #ff9f43 !important; 
+                outline: none;
+            }
+
+            /* Bouton d'ajout classique */
+            button[type="submit"], #orderForm button { 
+                background: linear-gradient(90deg, #ff9f43 0%, #ff7675 100%) !important; 
+                color: #0b131a !important; 
+                border: none !important;
+                font-weight: bold;
+                text-transform: uppercase;
+                cursor: pointer;
+            }
+            
+            button[type="submit"]:hover, #orderForm button:hover {
+                background: linear-gradient(90deg, #ffb167 0%, #ff8a88 100%) !important;
+            }
+        `;
+        document.head.appendChild(styleOrange);
+    }
+}
+
+// Lancement automatique du thème
+appliquerThemeEtNom();
+
+// ====== LOGIQUE DU PANIER ET DES COMMANDES ======
 const enseigne = "Lucky Plucker";
 let panier = [];
 const entrepriseNom = localStorage.getItem('entrepriseConnectee') || "Entreprise Partenaire";
@@ -106,8 +162,8 @@ function afficherMonPanierCourant() {
     panier.forEach((p, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>🛒 ${p.article}</td>
-            <td>${p.quantite}</td>
+            <td style="color: #fff !important;">🛒 ${p.article}</td>
+            <td style="color: #fff !important;">${p.quantite}</td>
             <td><button onclick="retirerDuPanier(${index})" style="background:#fc5c65; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Enlever</button></td>
         `;
         tbody.appendChild(row);
@@ -116,7 +172,7 @@ function afficherMonPanierCourant() {
     const rowValidation = document.createElement('tr');
     rowValidation.innerHTML = `
         <td colspan="3" style="text-align:center; padding-top: 15px;">
-            <button onclick="validerLeTicketFinal()" style="background: linear-gradient(90deg, #ffaa00 0%, #e69900 100%); color: #09121a; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; width:100%; text-transform:uppercase;">
+            <button onclick="validerLeTicketFinal()" style="background: linear-gradient(90deg, #ff9f43 0%, #ff7675 100%) !important; color: #09121a; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; width:100%; text-transform:uppercase;">
                 🚀 Envoyer la commande au ${enseigne}
             </button>
         </td>
@@ -129,20 +185,18 @@ window.retirerDuPanier = function(index) {
     afficherMonPanierCourant();
 };
 
-// Envoi groupé sous forme d'une commande unique
 window.validerLeTicketFinal = function() {
     if(panier.length === 0) return;
     
     let commandesGlobales = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
     const dateActuelle = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     
-    // On pousse une SEULE ligne contenant le tableau des détails
     commandesGlobales.push({
         id: Date.now(),
         heure: dateActuelle,
         entreprise: entrepriseNom,
-        details: [...panier], // Contient la liste complète des articles
-        statut: "Attente Paiement" // Statut initial demandé
+        details: [...panier],
+        statut: "Attente Paiement"
     });
     
     localStorage.setItem('commandesGlobales', JSON.stringify(commandesGlobales));
@@ -152,7 +206,7 @@ window.validerLeTicketFinal = function() {
     afficherMonPanierCourant();
     
     const tbody = document.getElementById('ordersList');
-    if(tbody) tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#00ffcc; font-weight:bold;">✅ Commande envoyée avec succès !</td></tr>';
+    if(tbody) tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#ff9f43; font-weight:bold;">✅ Commande envoyée avec succès !</td></tr>';
 };
 
 chargerCartePourClients();

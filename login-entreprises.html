@@ -72,24 +72,30 @@
     </div>
 
     <script>
-        document.getElementById('formEntreprise').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const user = document.getElementById('entUser').value;
-            const pass = document.getElementById('entPass').value;
+document.getElementById('formEntreprise').addEventListener('submit', function(e) {
+    e.preventDefault();
+    // On récupère les valeurs en minuscules pour éviter les erreurs de frappe
+    const user = document.getElementById('entUser').value.trim().toLowerCase();
+    const pass = document.getElementById('entPass').value.trim();
 
-            // Récupérer les comptes créés par le Boss sur l'admin
-            const comptes = JSON.parse(localStorage.getItem('comptesUtilisateurs')) || [];
-            
-            // Vérification stricte du compte entreprise
-            const compteTrouve = comptes.find(u => u.username === user && u.password === pass && u.role === 'entreprise');
+    // Récupérer les comptes créés par le Boss
+    const comptes = JSON.parse(localStorage.getItem('comptesUtilisateurs')) || [];
+    
+    // Recherche ultra-souple (on compare tout en minuscules)
+    const compteTrouve = comptes.find(u => 
+        u.username.toLowerCase() === user && 
+        u.password === pass && 
+        (u.role.toLowerCase() === 'entreprise' || u.role.toLowerCase().includes('entre'))
+    );
 
-            if (compteTrouve) {
-                localStorage.setItem('entrepriseConnectee', compteTrouve.username);
-                window.location.href = 'commandes.html'; // Envoi direct aux commandes
-            } else {
-                alert("Identifiants incorrects ou ce compte n'est pas configuré comme 'Entreprise' !");
-            }
-        });
-    </script>
+    if (compteTrouve) {
+        // On sauvegarde le vrai nom avec ses majuscules d'origine pour le ticket
+        localStorage.setItem('entrepriseConnectee', compteTrouve.username);
+        window.location.href = 'commandes.html';
+    } else {
+        alert("Connexion impossible.\n\n1. Vérifiez l'identifiant et le mot de passe.\n2. Assurez-vous que le Boss a bien sélectionné le rôle 'Entreprise' lors de la création.");
+    }
+});
+</script>
 </body>
 </html>

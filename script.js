@@ -358,10 +358,11 @@ function chargerComptaAdmin() {
         `;
     }
 
+    let cumulCA = 0;
+
     if (corpsTableau) {
         const fichesCompta = JSON.parse(localStorage.getItem('fichesCompta')) || {};
         corpsTableau.innerHTML = '';
-        let cumulCA = 0;
 
         Object.keys(fichesCompta).forEach((employe, idx) => {
             const data = fichesCompta[employe];
@@ -406,9 +407,19 @@ function chargerComptaAdmin() {
             `;
             corpsTableau.appendChild(subRow);
         });
-
-        if (caTotalElement) caTotalElement.textContent = `${cumulCA} $`;
     }
+
+    // ====== AJOUT DU TOTAL DES COMMANDES ENTREPRISES AU CA GLOBAL ======
+    const commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+    commandes.forEach(cmd => {
+        // Optionnel : si tu veux ajouter seulement le prix des articles connus de la boutique
+        // Ici, on récupère le prix de l'article s'il existe en boutique, sinon on met 0 par sécurité
+        const artBoutique = articlesBoutique.find(a => a.nom === cmd.article);
+        const prixUnitaire = artBoutique ? artBoutique.prix : 0;
+        cumulCA += (prixUnitaire * (parseInt(cmd.quantite) || 0));
+    });
+
+    if (caTotalElement) caTotalElement.textContent = `${cumulCA} $`;
 
     if (zoneArchives) {
         const archivesGlobales = JSON.parse(localStorage.getItem('archivesGlobales')) || [];
@@ -486,7 +497,7 @@ window.validerCommande = function(index) {
     
     // Recharger les affichages
     afficherCommandesPourAdmin();
-    if(typeof chargerDonniesAdmin === 'function') chargerDonniesAdmin(); 
+    if(typeof chargerComptaAdmin === 'function') chargerComptaAdmin(); 
 };
 
 // Injection automatique dans le chargement existant de l'admin

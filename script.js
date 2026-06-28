@@ -429,6 +429,7 @@ function chargerComptaAdmin() {
 window.remiseAZeroFiches = function() {
     if (confirm("Remettre à zéro toutes les fiches ?")) {
         localStorage.removeItem('fichesCompta');
+        localStorage.removeItem('commandesGlobales'); // AJOUT : Enlève aussi les commandes entreprises
         chargerComptaAdmin();
     }
 };

@@ -52,10 +52,10 @@
         </section>
     </div>
 
-    <script>
-      // Charger la carte décidée par le boss
+<script>
+// Charger la carte décidée par le boss (Correction de la clé localStorage)
 function chargerCartePourClients() {
-    const articles = JSON.parse(localStorage.getItem('articles')) || [];
+    const articles = JSON.parse(localStorage.getItem('articlesBoutique')) || [];
     const select = document.getElementById('orderItem');
     select.innerHTML = '<option value="">-- Choisir un produit --</option>';
 
@@ -73,8 +73,11 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
     const item = document.getElementById('orderItem').value;
     const qty = parseInt(document.getElementById('orderQuantity').value);
     
-    // On récupère le nom du client actuellement connecté (par exemple Benny)
-    // Pour l'instant on simule ou on peut laisser l'utilisateur taper, mais restons simple :
+    if(!item) {
+        alert("Veuillez sélectionner un article !");
+        return;
+    }
+    
     const entrepriseNom = prompt("Confirmez le nom de votre Entreprise (ex: Benny's, Taxi...) :") || "Entreprise Anonyme";
 
     // Récupérer les commandes existantes
@@ -102,6 +105,11 @@ function afficherMesCommandes() {
     const tbody = document.getElementById('ordersList');
     tbody.innerHTML = '';
 
+    if(commandesGlobales.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#a5b1c2;">Aucune commande récente</td></tr>';
+        return;
+    }
+
     commandesGlobales.forEach(cmd => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -113,8 +121,9 @@ function afficherMesCommandes() {
     });
 }
 
+// Initialisation au chargement de la page
 chargerCartePourClients();
 afficherMesCommandes();
-    </script>
+</script>
 </body>
 </html>

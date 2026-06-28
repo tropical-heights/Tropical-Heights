@@ -77,27 +77,26 @@ document.getElementById('formEntreprise').addEventListener('submit', function(e)
     const inputUser = document.getElementById('entUser').value.trim().toLowerCase();
     const inputPass = document.getElementById('entPass').value.trim();
 
-    // Récupération de la base de données de tes comptes
-    const baseComptes = JSON.parse(localStorage.getItem('comptesUtilisateurs')) || 
-                        JSON.parse(localStorage.getItem('utilisateurs')) || [];
+    // Correction : Récupérer la vraie clé "comptes" de ton site
+    const baseComptes = JSON.parse(localStorage.getItem('comptes')) || [];
     
-    // Recherche ultra-flexible qui s'adapte aux noms des clés de ton script d'origine
+    // Recherche précise dans la structure de ton script
     const compteTrouve = baseComptes.find(u => {
-        // Trouver l'identifiant (gère u.username ou u.nom, etc.)
-        const nomCompte = (u.username || u.nom || u.identifiant || "").toLowerCase();
+        const nomCompte = (u.username || "").toLowerCase();
+        const mdpCompte = String(u.password || "");
         
-        // Trouver le mot de passe (gère u.password ou u.mdp)
-        const mdpCompte = u.password || u.mdp || u.passwordInput || "";
+        // On vérifie aussi le rôle pour être sûr qu'un employé ne passe pas par ici
+        const roleCompte = (u.role || "").toLowerCase();
 
-        return nomCompte === inputUser && String(mdpCompte) === inputPass;
+        return nomCompte === inputUser && mdpCompte === inputPass && (roleCompte === 'entreprise' || roleCompte.includes('entre'));
     });
 
     if (compteTrouve) {
-        // Connexion réussie : on garde le nom d'origine pour les commandes
-        localStorage.setItem('entrepriseConnectee', compteTrouve.username || compteTrouve.nom || inputUser);
+        // Sauvegarder le nom pour l'espace commande
+        localStorage.setItem('entrepriseConnectee', compteTrouve.username);
         window.location.href = 'commandes.html';
     } else {
-        alert("Connexion impossible.\n\nVérifiez que l'identifiant et le mot de passe correspondent exactement à la fiche créée sur le Panel Admin.");
+        alert("Connexion impossible.\n\nVérifiez que l'identifiant et le mot de passe correspondent exactement.");
     }
 });
 </script>

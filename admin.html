@@ -279,6 +279,13 @@
                 </form>
             </div>
 
+            <div class="card">
+                <h3>📜 Journal de Sécurité & Flux en direct</h3>
+                <div id="archives-globales" class="log-flux">
+                    <p style="color: #4b6584; margin: 0; font-size: 14px; font-style: italic;">Aucun flux de données détecté pour le moment.</p>
+                </div>
+            </div>
+
             <div class="card card-full">
                 <h3>📦 Commandes des Entreprises Partenaires</h3>
                 <div style="overflow-x: auto;">
@@ -298,4 +305,113 @@
                 </div>
             </div>
 
-            <div
+        </div>
+
+        <div class="action-footer">
+            <button onclick="window.remiseAZeroFiches()" class="btn-danger">
+                Purger la Comptabilité
+            </button>
+            <a href="index.html" class="btn-logout">Fermer la Session</a>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+    <script>
+    function afficherCommandesPourAdmin() {
+        const tbody = document.getElementById('corps-tableau-commandes');
+        if (!tbody) return;
+
+        const commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+        tbody.innerHTML = '';
+
+        if (commandes.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#4b6584; font-style:italic;">Aucune commande en attente.</td></tr>';
+            return;
+        }
+
+        commandes.forEach((cmd, index) => {
+            let couleurStatut = "#ffaa00"; 
+            if (cmd.statut === "Attente Livraison") couleurStatut = "#00bcff"; 
+            if (cmd.statut === "Livrée") couleurStatut = "#00ffcc"; 
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${cmd.entreprise}</strong> <span style="color:#4b6584; font-size:11px;">(${cmd.heure || 'S/D'})</span></td>
+                <td>
+                    <button onclick="voirDetailsCommande(${index})" style="background:#22374a; color:#ffffff; border:1px solid #3b5973; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:12px;">
+                        👁️ Voir Détails
+                    </button>
+                </td>
+                <td style="text-align: center; font-weight: bold;">${cmd.details ? cmd.details.reduce((acc, p) => acc + p.quantite, 0) : cmd.quantite || 0}</td>
+                <td style="text-align: center;">
+                    <span style="color: ${couleurStatut}; font-weight:bold; background:rgba(0,0,0,0.2); padding:4px 8px; border-radius:4px; border:1px solid ${couleurStatut}33;">
+                        ${cmd.statut || "Attente Paiement"}
+                    </span>
+                </td>
+                <td style="text-align: right;">
+                    ${cmd.statut !== 'Livrée' ? 
+                    `<button onclick="avancerStatutCommande(${index})" style="background:${cmd.statut === 'Attente Paiement' ? '#ffaa00' : '#00bcff'}; color:#09121a; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px;">
+                        ${cmd.statut === 'Attente Paiement' ? 'Valider Paiement 💰' : 'Valider Livraison 📦'}
+                    </button>` : 
+                    `<span style="color:#a5b1c2; font-size:12px; font-weight:bold;">Archivé ✅</span>`}
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    window.voirDetailsCommande = function(index) {
+        const commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+        const cmd = commandes[index];
+        
+        if (!cmd.details || cmd.details.length === 0) {
+            alert(`Détail commande de ${cmd.entreprise} :\n- ${cmd.article} (Qté: ${cmd.quantite})`);
+            return;
+        }
+
+        let texteDetails = `📦 DÉTAILS DE LA COMMANDE (${cmd.entreprise}) :\n`;
+        texteDetails += `-------------------------------------------\n`;
+        cmd.details.forEach(p => {
+            texteDetails += `• ${p.article}  --> Quantité : ${p.quantite}\n`;
+        });
+        texteDetails += `-------------------------------------------\n`;
+        texteDetails += `Statut actuel : ${cmd.statut}`;
+        
+        alert(texteDetails);
+    };
+
+    window.avancerStatutCommande = function(index) {
+        let commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+        let cmd = commandes[index];
+        let ancienStatut = cmd.statut || "Attente Paiement";
+        let nouveauStatut = "";
+
+        if (ancienStatut === "Attente Paiement") {
+            nouveauStatut = "Attente Livraison";
+        } else if (ancienStatut === "Attente Livraison") {
+            nouveauStatut = "Livrée";
+        } else {
+            return;
+        }
+
+        commandes[index].statut = nouveauStatut;
+        localStorage.setItem('commandesGlobales', JSON.stringify(commandes));
+        
+        let archivesGlobales = JSON.parse(localStorage.getItem('archivesGlobales')) || [];
+        const dateActuelle = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        archivesGlobales.unshift({
+            texte: `[${dateActuelle}] DIRECTION : Commande "${cmd.entreprise}" passée de [${ancienStatut}] à [${nouveauStatut}].`
+        });
+        localStorage.setItem('archivesGlobales', JSON.stringify(archivesGlobales));
+        
+        afficherCommandesPourAdmin();
+        if(typeof chargerDonniesAdmin === 'function') chargerDonniesAdmin(); 
+    };
+
+    setTimeout(afficherCommandesPourAdmin, 150);
+    window.addEventListener('click', () => { setTimeout(afficherCommandesPourAdmin, 250); });
+    </script>
+</body>
+</html>

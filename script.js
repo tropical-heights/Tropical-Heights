@@ -442,3 +442,56 @@ document.addEventListener("DOMContentLoaded", function() {
         initialiserGestionArticlesAdmin();
     }
 });
+// ====== SUIVI DES COMMANDES ENTREPRISES (PANEL BOSS) ======
+function afficherCommandesPourAdmin() {
+    const tbody = document.getElementById('corps-tableau-commandes');
+    if (!tbody) return; // Si on n'est pas sur la page admin, on arrête
+
+    const commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+    tbody.innerHTML = '';
+
+    if (commandes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#4b6584; font-style:italic;">Aucune commande en attente.</td></tr>';
+        return;
+    }
+
+    commandes.forEach((cmd, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${cmd.entreprise}</strong></td>
+            <td>${cmd.article}</td>
+            <td style="text-align: center;">${cmd.quantite}</td>
+            <td style="text-align: center;"><span style="color: ${cmd.statut === 'En attente' ? '#ffaa00' : '#00ffcc'}; font-weight:bold;">${cmd.statut}</span></td>
+            <td style="text-align: right;">
+                ${cmd.statut === 'En attente' ? `<button onclick="validerCommande(${index})" style="background:#00ffcc; color:#09121a; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold;">Livrer 👍</button>` : `<span style="color:#a5b1c2; font-size:12px;">Terminé</span>`}
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+window.validerCommande = function(index) {
+    let commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+    commandes[index].statut = "Livrée";
+    localStorage.setItem('commandesGlobales', JSON.stringify(commandes));
+    
+    // Notification dans les logs de l'admin
+    let archivesGlobales = JSON.parse(localStorage.getItem('archivesGlobales')) || [];
+    const dateActuelle = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    archivesGlobales.unshift({
+        texte: `[${dateActuelle}] DIRECTION : Commande de l'entreprise "${commandes[index].entreprise}" validée et livrée.`
+    });
+    localStorage.setItem('archivesGlobales', JSON.stringify(archivesGlobales));
+    
+    // Recharger les affichages
+    afficherCommandesPourAdmin();
+    if(typeof chargerDonniesAdmin === 'function') chargerDonniesAdmin(); 
+};
+
+// Injection automatique dans le chargement existant de l'admin
+if (document.getElementById('panel-suivi-employes')) {
+    // Lance l'affichage au démarrage
+    setTimeout(afficherCommandesPourAdmin, 100);
+    // Actualise dès qu'une vente ou action a lieu
+    window.addEventListener('click', () => { setTimeout(afficherCommandesPourAdmin, 200); });
+}

@@ -447,7 +447,9 @@ window.remiseAZeroFiches = function() {
 
 // Lancement global au chargement du DOM
 document.addEventListener("DOMContentLoaded", function() {
-    appliquerThemeEtNom();
+    // S'exécute sur absolument toutes les pages pour appliquer le thème et le nom
+    appliquerThemeEtNom(); 
+    
     if (document.getElementById('panel-suivi-employes') || document.getElementById('corps-tableau-ca')) {
         chargerComptaAdmin();
         afficherListeComptes();

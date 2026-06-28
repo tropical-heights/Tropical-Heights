@@ -14,9 +14,27 @@ if (!articlesBoutique || articlesBoutique.length === 0) {
     articlesBoutique = [
         { nom: "Entrée Simple", prix: 500, prixUsine: 0 },
         { nom: "Entrée VIP", prix: 1500, prixUsine: 0 },
-        { nom: "Cocktail Tropical", prix: 200, prixUsine: 100 } // Exemple : acheté 100$, vendu 200$
+        { nom: "Cocktail Lucky", prix: 200, prixUsine: 100 }
     ];
     localStorage.setItem('articlesBoutique', JSON.stringify(articlesBoutique));
+}
+
+// ====== MISE À JOUR DYNAMIQUE DU NOM "LUCKY PLUCKER" ======
+function appliquerNomEnseigne() {
+    // Change le gros titre dans la sidebar de l'admin s'il existe
+    const sidebarTitle = document.querySelector('.sidebar h2');
+    if (sidebarTitle) sidebarTitle.textContent = "Lucky Plucker";
+
+    // Change le titre principal H1 (sur l'accueil ou l'espace employé)
+    const mainTitle = document.querySelector('h1');
+    if (mainTitle && (mainTitle.textContent.includes("Tropical") || mainTitle.textContent.includes("Lucky"))) {
+        mainTitle.textContent = "Lucky Plucker";
+    }
+
+    // Change le titre de l'onglet du navigateur
+    if (document.title.includes("Tropical Heights")) {
+        document.title = document.title.replace("Tropical Heights", "Lucky Plucker");
+    }
 }
 
 // ====== GESTION DE LA CONNEXION (INDEX.HTML) ======
@@ -52,13 +70,18 @@ if (saleForm) {
         nomEmployeData.textContent = employeConnecte.username;
     }
 
+    // Modifier le sous-texte de l'employé pour afficher Lucky Plucker
+    const subText = document.querySelector('.sub');
+    if (subText && employeConnecte) {
+        subText.innerHTML = `Espace Employé — Enregistrement des Ventes (Connecté en tant que : <span id="nom-employe" style="color:#fff; font-weight:bold;">${employeConnecte.username}</span>)`;
+    }
+
     // Charger dynamiquement les articles dans le select de l'employé
     const itemSelect = document.getElementById('itemSelect');
     if (itemSelect) {
         itemSelect.innerHTML = '';
         articlesBoutique.forEach((art, index) => {
             const opt = document.createElement('option');
-            // On stocke l'index de l'article pour retrouver facilement le prix et le prix usine
             opt.value = index; 
             opt.textContent = `${art.nom} (${art.prix}$)`;
             itemSelect.appendChild(opt);
@@ -82,7 +105,6 @@ if (saleForm) {
         const quantity = parseInt(quantityInput.value) || 1;
         
         const totalVente = itemPrix * quantity;
-        // Calcul du bénéfice sur cette vente : (Vente - Usine) * Quantité
         const totalBenefice = (itemPrix - itemPrixUsine) * quantity; 
 
         const nomEmploye = employeConnecte ? employeConnecte.username : "Employe1";
@@ -92,11 +114,9 @@ if (saleForm) {
             fichesCompta[nomEmploye] = { ventes: 0, ca: 0, benefices: 0, detail: {} };
         }
         
-        // Sécurités pour les anciennes fiches
         if (!fichesCompta[nomEmploye].detail) fichesCompta[nomEmploye].detail = {};
         if (!fichesCompta[nomEmploye].benefices) fichesCompta[nomEmploye].benefices = 0;
 
-        // Enregistrement de la vente
         fichesCompta[nomEmploye].ventes += quantity;
         fichesCompta[nomEmploye].ca += totalVente;
         fichesCompta[nomEmploye].benefices += totalBenefice;
@@ -180,7 +200,7 @@ function afficherListeComptes() {
     });
 }
 
-// ====== INTERFACE D'AJOUT DES ARTICLES (AVEC PRIX USINE) ======
+// ====== INTERFACE D'AJOUT DES ARTICLES ======
 function initialiserGestionArticlesAdmin() {
     const panelAdmin = document.getElementById('panel-suivi-employes');
     if (!panelAdmin) return;
@@ -205,7 +225,7 @@ function initialiserGestionArticlesAdmin() {
         <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 18px; color: #ffffff; border-bottom: 1px solid #1f3141; padding-bottom: 12px;">🛍️ Gestion des Articles & Prix</h3>
         <div style="margin-bottom: 15px;">
             <label style="display:block; margin-bottom:5px; color:#a5b1c2; font-size:14px;">Nom du produit :</label>
-            <input type="text" id="addArtName" class="form-control" placeholder="Ex: Champagne" style="margin-bottom:10px;">
+            <input type="text" id="addArtName" class="form-control" placeholder="Ex: Poulet Frit" style="margin-bottom:10px;">
             
             <label style="display:block; margin-bottom:5px; color:#a5b1c2; font-size:14px;">Prix de vente ($) :</label>
             <input type="number" id="addArtPrice" class="form-control" placeholder="Ex: 200" min="0" style="margin-bottom:10px;">
@@ -289,13 +309,16 @@ window.supprimerItem = function(index) {
     }
 };
 
-// ====== AFFICHAGE DE LA COMPTA DU PANEL BOSS ======
+// ====== AFFICHAGE DE LA COMPTA ======
 function chargerComptaAdmin() {
     const corpsTableau = document.getElementById('corps-tableau-ca');
     const zoneArchives = document.getElementById('archives-globales');
     const caTotalElement = document.getElementById('ca-total');
 
-    // Modification dynamique des en-têtes de colonnes du tableau HTML existant
+    // Met à jour le sous-titre de la boîte de CA global
+    const caText = document.querySelector('.ca-box p');
+    if (caText) caText.textContent = "Chiffre d'Affaires Global Lucky Plucker";
+
     const tableHeader = document.querySelector('table thead tr');
     if (tableHeader) {
         tableHeader.innerHTML = `
@@ -316,7 +339,6 @@ function chargerComptaAdmin() {
             cumulCA += data.ca;
             const beneficeEmploye = data.benefices || 0;
 
-            // Ligne principale cliquable
             const row = document.createElement('tr');
             row.style.cursor = 'pointer';
             row.title = "Cliquez pour voir/masquer le détail";
@@ -333,7 +355,6 @@ function chargerComptaAdmin() {
             `;
             corpsTableau.appendChild(row);
 
-            // Sous-menu déroulant (Contient le détail)
             const subRow = document.createElement('tr');
             subRow.id = `detail-${idx}`;
             subRow.style.display = 'none';
@@ -383,8 +404,12 @@ window.remiseAZeroFiches = function() {
     }
 };
 
-if (document.getElementById('panel-suivi-employes') || document.getElementById('corps-tableau-ca')) {
-    chargerComptaAdmin();
-    afficherListeComptes();
-    initialiserGestionArticlesAdmin();
-}
+// Lancement global au chargement du DOM
+document.addEventListener("DOMContentLoaded", function() {
+    appliquerNomEnseigne();
+    if (document.getElementById('panel-suivi-employes') || document.getElementById('corps-tableau-ca')) {
+        chargerComptaAdmin();
+        afficherListeComptes();
+        initialiserGestionArticlesAdmin();
+    }
+});

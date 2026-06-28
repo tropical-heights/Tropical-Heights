@@ -53,11 +53,11 @@
     </div>
 
 <script>
-// Panier temporaire (Le ticket en attente)
+// Modification du nom de l'enseigne
+const enseigne = "Lucky Plucker";
 let panier = [];
 const entrepriseNom = localStorage.getItem('entrepriseConnectee') || "Entreprise Partenaire";
 
-// Charger les articles disponibles créés par le Boss
 function chargerCartePourClients() {
     const articles = JSON.parse(localStorage.getItem('articlesBoutique')) || [];
     const select = document.getElementById('orderItem');
@@ -72,18 +72,16 @@ function chargerCartePourClients() {
     });
 }
 
-// 1. AJOUTER AU TICKET (En attente de validation)
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const item = document.getElementById('orderItem').value;
     const qty = parseInt(document.getElementById('orderQuantity').value);
     
     if(!item || isNaN(qty) || qty <= 0) {
-        alert("Veuillez sélectionner un article et une quantité valide !");
+        alert("Veuillez sélectionner un article valide !");
         return;
     }
     
-    // Ajouter ou cumuler dans le panier local
     const indexExiste = panier.findIndex(p => p.article === item);
     if(indexExiste > -1) {
         panier[indexExiste].quantite += qty;
@@ -95,11 +93,9 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
     document.getElementById('orderForm').reset();
 });
 
-// Afficher le panier en cours sous forme de Ticket avant validation
 function afficherMonPanierCourant() {
     const tbody = document.getElementById('ordersList');
     if(!tbody) return;
-    
     tbody.innerHTML = '';
     
     if(panier.length === 0) {
@@ -107,7 +103,6 @@ function afficherMonPanierCourant() {
         return;
     }
     
-    // Affichage des articles du ticket actuel
     panier.forEach((p, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -118,57 +113,48 @@ function afficherMonPanierCourant() {
         tbody.appendChild(row);
     });
     
-    // Ajouter un gros bouton pour valider TOUT le ticket d'un coup
     const rowValidation = document.createElement('tr');
     rowValidation.innerHTML = `
         <td colspan="3" style="text-align:center; padding-top: 15px;">
             <button onclick="validerLeTicketFinal()" style="background: linear-gradient(90deg, #ffaa00 0%, #e69900 100%); color: #09121a; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; width:100%; text-transform:uppercase;">
-                🚀 Envoyer la commande finale au Tropical Heights
+                🚀 Envoyer la commande au ${enseigne}
             </button>
         </td>
     `;
     tbody.appendChild(rowValidation);
 }
 
-// Supprimer un élément du panier si erreur
 window.retirerDuPanier = function(index) {
     panier.splice(index, 1);
     afficherMonPanierCourant();
 };
 
-// 2. VALIDER LE TICKET FINAL (Envoi global au Boss)
+// Envoi groupé sous forme d'une commande unique
 window.validerLeTicketFinal = function() {
     if(panier.length === 0) return;
     
     let commandesGlobales = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
+    const dateActuelle = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     
-    // On propulse chaque ligne du panier dans les commandes du Boss
-    panier.forEach(p => {
-        commandesGlobales.push({
-            entreprise: entrepriseNom,
-            article: p.article,
-            quantite: p.quantite,
-            statut: "En attente"
-        });
+    // On pousse une SEULE ligne contenant le tableau des détails
+    commandesGlobales.push({
+        id: Date.now(),
+        heure: dateActuelle,
+        entreprise: entrepriseNom,
+        details: [...panier], // Contient la liste complète des articles
+        statut: "Attente Paiement" // Statut initial demandé
     });
     
-    // Sauvegarde
     localStorage.setItem('commandesGlobales', JSON.stringify(commandesGlobales));
     
-    alert("Votre commande groupée a bien été transmise à la Direction !");
-    panier = []; // On vide le panier
+    alert("Votre commande groupée a bien été transmise !");
+    panier = [];
+    afficherMonPanierCourant();
     
-    // Afficher un message de confirmation
     const tbody = document.getElementById('ordersList');
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#00ffcc; font-weight:bold;">✅ Commande envoyée avec succès !</td></tr>';
+    if(tbody) tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#00ffcc; font-weight:bold;">✅ Commande envoyée avec succès !</td></tr>';
 };
 
-// Sécurité : Si l'utilisateur n'est pas connecté en tant qu'entreprise, on peut afficher son nom par défaut
-if(document.getElementById('nom-entreprise-accueil')) {
-    document.getElementById('nom-entreprise-accueil').textContent = entrepriseNom;
-}
-
-// Initialisation
 chargerCartePourClients();
 afficherMonPanierCourant();
 </script>

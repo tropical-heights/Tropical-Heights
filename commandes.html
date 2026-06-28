@@ -78,7 +78,7 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
         return;
     }
     
-    const entrepriseNom = prompt("Confirmez le nom de votre Entreprise (ex: Benny's, Taxi...) :") || "Entreprise Anonyme";
+    const entrepriseNom = localStorage.getItem('entrepriseConnectee') || "Entreprise Partenaire";
 
     // Récupérer les commandes existantes
     let commandesGlobales = JSON.parse(localStorage.getItem('commandesGlobales')) || [];

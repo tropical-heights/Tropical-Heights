@@ -74,26 +74,28 @@
     <script>
 document.getElementById('formEntreprise').addEventListener('submit', function(e) {
     e.preventDefault();
-    // On récupère les valeurs en minuscules pour éviter les erreurs de frappe
     const user = document.getElementById('entUser').value.trim().toLowerCase();
     const pass = document.getElementById('entPass').value.trim();
 
-    // Récupérer les comptes créés par le Boss
-    const comptes = JSON.parse(localStorage.getItem('comptesUtilisateurs')) || [];
+    // 1. On récupère TOUTES les clés possibles que ton script utilise pour stocker les comptes
+    const listeComptes = JSON.parse(localStorage.getItem('comptesUtilisateurs')) || 
+                         JSON.parse(localStorage.getItem('utilisateurs')) || 
+                         JSON.parse(localStorage.getItem('utilisateursList')) || [];
     
-    // Recherche ultra-souple (on compare tout en minuscules)
-    const compteTrouve = comptes.find(u => 
+    // 2. On cherche le compte correspondant à l'identifiant et au mot de passe
+    const compteTrouve = listeComptes.find(u => 
         u.username.toLowerCase() === user && 
-        u.password === pass && 
-        (u.role.toLowerCase() === 'entreprise' || u.role.toLowerCase().includes('entre'))
+        u.password === pass
     );
 
     if (compteTrouve) {
-        // On sauvegarde le vrai nom avec ses majuscules d'origine pour le ticket
+        // On valide la connexion et on mémorise le nom
         localStorage.setItem('entrepriseConnectee', compteTrouve.username);
         window.location.href = 'commandes.html';
     } else {
-        alert("Connexion impossible.\n\n1. Vérifiez l'identifiant et le mot de passe.\n2. Assurez-vous que le Boss a bien sélectionné le rôle 'Entreprise' lors de la création.");
+        // 3. Si vraiment aucun compte ne correspond, on affiche ce qu'il y a en mémoire pour comprendre
+        console.log("Comptes trouvés en base :", listeComptes);
+        alert("Identifiant ou mot de passe incorrect.\n\nAssurez-vous de taper exactement ce que le Boss a écrit dans le Panel.");
     }
 });
 </script>

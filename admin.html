@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tropical Heights - Panel Administration Professionnel</title>
+
+    <title>Bar Plage - Panel Administration Professionnel</title>
+
     <style>
         body {
-            background-color: #0b131a;
+            background-color: #071A24;
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             color: #f5f6fa;
             margin: 0;
@@ -14,26 +16,29 @@
             display: flex;
             min-height: 100vh;
         }
+
         .sidebar {
             width: 260px;
-            background: linear-gradient(180deg, #111b24 0%, #0d161e 100%);
-            border-right: 1px solid #1f3141;
+            background: #0B2633;
+            border-right: 1px solid #174958;
             padding: 30px 20px;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
         }
+
         .sidebar h2 {
-            color: #00ffcc;
+            color: #19D3C5;
             font-size: 20px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             margin-top: 0;
             margin-bottom: 40px;
             text-align: center;
-            border-bottom: 2px solid #1f3141;
+            border-bottom: 2px solid #174958;
             padding-bottom: 15px;
         }
+
         .sidebar-menu {
             list-style: none;
             padding: 0;
@@ -42,8 +47,9 @@
             flex-direction: column;
             gap: 12px;
         }
+
         .sidebar-menu li a {
-            color: #a5b1c2;
+            color: #9DB4BC;
             text-decoration: none;
             padding: 12px 15px;
             border-radius: 6px;
@@ -53,12 +59,15 @@
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid transparent;
         }
-        .sidebar-menu li a:hover, .sidebar-menu li a.active {
-            color: #ffffff;
-            background: linear-gradient(90deg, #1c2d3d 0%, #152330 100%);
-            border-color: #00ffcc;
+
+        .sidebar-menu li a:hover,
+        .sidebar-menu li a.active {
+            color: #19D3C5;
+            background: rgba(25, 211, 197, 0.12);
+            border-color: #19D3C5;
             padding-left: 20px;
         }
+
         .main-content {
             flex: 1;
             padding: 40px;
@@ -66,147 +75,169 @@
             box-sizing: border-box;
             overflow-y: auto;
         }
+
         .header-panel {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 35px;
         }
+
         .header-panel h1 {
             font-size: 28px;
             font-weight: 700;
-            color: #ffffff;
+            color: #19D3C5;
             margin: 0;
         }
+
         .status-badge {
-            background: rgba(0, 255, 204, 0.1);
-            color: #00ffcc;
+            background: rgba(25, 211, 197, 0.12);
+            color: #19D3C5;
             padding: 6px 16px;
             border-radius: 20px;
             font-size: 13px;
             font-weight: 600;
-            border: 1px solid rgba(0, 255, 204, 0.3);
+            border: 1px solid rgba(25, 211, 197, 0.3);
         }
+
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 30px;
             margin-bottom: 35px;
         }
+
         .card {
-            background: #121f2b;
-            border: 1px solid #1f3141;
+            background: #0F3340;
+            border: 1px solid #174958;
             border-radius: 10px;
             padding: 25px;
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
             box-sizing: border-box;
         }
+
         .card-full {
             grid-column: 1 / -1;
         }
+
         .card h3 {
             margin-top: 0;
             margin-bottom: 20px;
             font-size: 18px;
-            color: #ffffff;
-            border-bottom: 1px solid #1f3141;
+            color: #19D3C5;
+            border-bottom: 1px solid #174958;
             padding-bottom: 12px;
         }
+
         .ca-box {
-            background: linear-gradient(135deg, #172a3a 0%, #11202e 100%);
-            border: 1px solid #253d54;
+            background: #0B2633;
+            border: 1px solid #174958;
             border-radius: 10px;
             padding: 30px;
             text-align: center;
             margin-bottom: 35px;
         }
+
         .ca-box p {
             margin: 0;
-            color: #8b9bb4;
+            color: #9DB4BC;
             font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
+
         .ca-box .amount {
             font-size: 46px;
-            color: #00ffcc;
+            color: #19D3C5;
             font-weight: 800;
             margin-top: 12px;
         }
+
         .form-group {
             margin-bottom: 18px;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #a5b1c2;
+            color: #9DB4BC;
             font-size: 14px;
         }
+
         .form-control {
             width: 100%;
             padding: 12px;
-            background: #09121a;
-            border: 1px solid #22374a;
+            background: #091F2A;
+            border: 1px solid #174958;
             border-radius: 6px;
             color: #ffffff;
             font-size: 14px;
             box-sizing: border-box;
         }
+
         .btn-submit {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(90deg, #00ffcc 0%, #00e6b8 100%);
-            color: #09121a;
+            background: #19D3C5;
+            color: #071A24;
             border: none;
             border-radius: 6px;
             font-weight: 700;
             cursor: pointer;
             text-transform: uppercase;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
+
         th {
-            background-color: #182836;
-            color: #a5b1c2;
+            background-color: #12313D;
+            color: #19D3C5;
             padding: 14px;
-            border: 1px solid #1f3141;
+            border: 1px solid #174958;
             text-align: left;
         }
+
         td {
             padding: 14px;
-            border: 1px solid #1f3141;
-            background-color: #101c27;
+            border: 1px solid #174958;
+            background-color: #0C2732;
         }
+
         .log-flux {
-            background: #080f14;
-            border: 1px solid #1a2936;
+            background: #06151D;
+            border: 1px solid #174958;
             border-radius: 6px;
             padding: 15px;
             max-height: 200px;
             overflow-y: auto;
         }
+
         .action-footer {
             margin-top: 40px;
             display: flex;
             justify-content: flex-end;
             gap: 15px;
-            border-top: 1px solid #1f3141;
+            border-top: 1px solid #174958;
             padding-top: 25px;
         }
+
         .btn-danger {
-            background: #fc5c65;
-            color: white;
-            border: none;
+            background: #12313D;
+            color: #19D3C5;
+            border: 1px solid #174958;
             padding: 12px 24px;
             border-radius: 6px;
             font-weight: 600;
             cursor: pointer;
         }
+
         .btn-logout {
-            background: #4b6584;
-            color: white;
+            background: #12313D;
+            color: #19D3C5;
+            border: 1px solid #174958;
             text-decoration: none;
             padding: 12px 24px;
             border-radius: 6px;
@@ -214,204 +245,282 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="sidebar">
-        <h2>Tropical Heights</h2>
+
+        <h2>Bar Plage</h2>
+
         <ul class="sidebar-menu">
-            <li><a href="admin.html" class="active">Espace Direction</a></li>
-            <li><a href="employe.html">Interface Serveur</a></li>
-            <li><a href="index.html">Page d'accueil / Déconnexion</a></li>
+
+            <li>
+                <a href="admin.html" class="active">
+                    Espace Direction
+                </a>
+            </li>
+
+            <li>
+                <a href="employe.html">
+                    Interface Serveur
+                </a>
+            </li>
+
+            <li>
+                <a href="index.html">
+                    Page d'accueil / Déconnexion
+                </a>
+            </li>
+
         </ul>
+
     </div>
 
-    <div id="panel-suivi-employes" class="main-content">
-        
+    <div
+        id="panel-suivi-employes"
+        class="main-content"
+    >
+
         <div class="header-panel">
-            <h1>TABLEAU DE BORD EXÉCUTIF</h1>
-            <div class="status-badge">SESSION DIRIGEANT ACTIVE</div>
+
+            <h1>
+                TABLEAU DE BORD EXÉCUTIF
+            </h1>
+
+            <div class="status-badge">
+                SESSION DIRIGEANT ACTIVE
+            </div>
+
         </div>
 
         <div class="ca-box">
-            <p>Chiffre d'Affaires Global Intranet</p>
-            <div id="ca-total" class="amount">0 $</div>
+
+            <p>
+                Chiffre d'Affaires Global Bar Plage
+            </p>
+
+            <div
+                id="ca-total"
+                class="amount"
+            >
+                0 $
+            </div>
+
         </div>
 
         <div class="dashboard-grid">
-            
+
             <div class="card card-full">
-                <h3>📊 Suivi Économique des Employés</h3>
-                <div style="overflow-x: auto;">
+
+                <h3>
+                    📊 Suivi Économique des Employés
+                </h3>
+
+                <div style="overflow-x:auto;">
+
                     <table>
+
                         <thead>
+
                             <tr>
-                                <th>Identifiant Collaborateur</th>
-                                <th style="text-align: center;">Volumes Ventes</th>
-                                <th style="text-align: right;">Rentabilité Générée</th>
+
+                                <th>
+                                    Identifiant Collaborateur
+                                </th>
+
+                                <th style="text-align:center;">
+                                    Volumes Ventes
+                                </th>
+
+                                <th style="text-align:right;">
+                                    Rentabilité Générée
+                                </th>
+
                             </tr>
+
                         </thead>
+
                         <tbody id="corps-tableau-ca">
                         </tbody>
+
                     </table>
+
                 </div>
+
             </div>
 
             <div class="card">
-                <h3>🔑 Gestion des Accès et Recrutement</h3>
+
+                <h3>
+                    🔑 Gestion des Accès et Recrutement
+                </h3>
+
                 <form id="registerForm">
+
                     <div class="form-group">
-                        <label>Identifiant utilisateur unique :</label>
-                        <input type="text" id="newUsername" class="form-control" placeholder="Ex: Employe2" required>
+
+                        <label>
+                            Identifiant utilisateur unique :
+                        </label>
+
+                        <input
+                            type="text"
+                            id="newUsername"
+                            class="form-control"
+                            placeholder="Ex: Employe2"
+                            required
+                        >
+
                     </div>
+
                     <div class="form-group">
-                        <label>Mot de passe réseau sécurisé :</label>
-                        <input type="password" id="newPassword" class="form-control" placeholder="••••••••" required>
+
+                        <label>
+                            Mot de passe réseau sécurisé :
+                        </label>
+
+                        <input
+                            type="password"
+                            id="newPassword"
+                            class="form-control"
+                            placeholder="••••••••"
+                            required
+                        >
+
                     </div>
+
                     <div class="form-group">
-                        <label>Habilitation / Rôle système :</label>
-                        <select id="newRole" class="form-control">
-                            <option value="employe">Employé (Saisie des ventes)</option>
-                            <option value="entreprise">Entreprise Partenaire (Espace Commandes)</option>
-                            <option value="admin">Administrateur / Boss (Accès total)</option>
+
+                        <label>
+                            Habilitation / Rôle système :
+                        </label>
+
+                        <select
+                            id="newRole"
+                            class="form-control"
+                        >
+
+                            <option value="employe">
+                                Employé (Saisie des ventes)
+                            </option>
+
+                            <option value="entreprise">
+                                Entreprise Partenaire (Espace Commandes)
+                            </option>
+
+                            <option value="admin">
+                                Administrateur / Boss (Accès total)
+                            </option>
+
                         </select>
+
                     </div>
-                    <button type="submit" class="btn-submit">Créer et Valider les Accès</button>
+
+                    <button
+                        type="submit"
+                        class="btn-submit"
+                    >
+                        Créer et Valider les Accès
+                    </button>
+
                 </form>
+
             </div>
 
             <div class="card">
-                <h3>📜 Journal de Sécurité & Flux en direct</h3>
-                <div id="archives-globales" class="log-flux">
-                    <p style="color: #4b6584; margin: 0; font-size: 14px; font-style: italic;">Aucun flux de données détecté pour le moment.</p>
+
+                <h3>
+                    📜 Journal de Sécurité & Flux en direct
+                </h3>
+
+                <div
+                    id="archives-globales"
+                    class="log-flux"
+                >
+
+                    <p style="
+                        color:#9DB4BC;
+                        margin:0;
+                        font-size:14px;
+                        font-style:italic;
+                    ">
+                        Aucun flux de données détecté pour le moment.
+                    </p>
+
                 </div>
+
             </div>
 
             <div class="card card-full">
-                <h3>📦 Commandes des Entreprises Partenaires</h3>
-                <div style="overflow-x: auto;">
+
+                <h3>
+                    📦 Commandes des Entreprises Partenaires
+                </h3>
+
+                <div style="overflow-x:auto;">
+
                     <table>
+
                         <thead>
+
                             <tr>
-                                <th>Entreprise</th>
-                                <th>Contenu Commande</th>
-                                <th style="text-align: center;">Total Articles</th>
-                                <th style="text-align: center;">Statut</th>
-                                <th style="text-align: right;">Action</th>
+
+                                <th>
+                                    Entreprise
+                                </th>
+
+                                <th>
+                                    Contenu Commande
+                                </th>
+
+                                <th style="text-align:center;">
+                                    Total Articles
+                                </th>
+
+                                <th style="text-align:center;">
+                                    Statut
+                                </th>
+
+                                <th style="text-align:right;">
+                                    Action
+                                </th>
+
                             </tr>
+
                         </thead>
+
                         <tbody id="corps-tableau-commandes">
                         </tbody>
+
                     </table>
+
                 </div>
+
             </div>
 
         </div>
 
         <div class="action-footer">
-            <button onclick="window.remiseAZeroFiches()" class="btn-danger">
+
+            <button
+                onclick="window.remiseAZeroFiches()"
+                class="btn-danger"
+            >
                 Purger la Comptabilité
             </button>
-            <a href="index.html" class="btn-logout">Fermer la Session</a>
+
+            <a
+                href="index.html"
+                class="btn-logout"
+            >
+                Fermer la Session
+            </a>
+
         </div>
 
     </div>
 
     <script src="script.js"></script>
 
-    <script>
-    function afficherCommandesPourAdmin() {
-        const tbody = document.getElementById('corps-tableau-commandes');
-        if (!tbody) return;
-
-        const commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
-        tbody.innerHTML = '';
-
-        if (commandes.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#4b6584; font-style:italic;">Aucune commande en attente.</td></tr>';
-            return;
-        }
-
-        commandes.forEach((cmd, index) => {
-            let couleurStatut = "#ffaa00"; 
-            if (cmd.statut === "Attente Livraison") couleurStatut = "#00bcff"; 
-            if (cmd.statut === "Livrée") couleurStatut = "#00ffcc"; 
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>${cmd.entreprise}</strong> <span style="color:#4b6584; font-size:11px;">(${cmd.heure || 'S/D'})</span></td>
-                <td>
-                    <button onclick="voirDetailsCommande(${index})" style="background:#22374a; color:#ffffff; border:1px solid #3b5973; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:12px;">
-                        👁️ Voir Détails
-                    </button>
-                </td>
-                <td style="text-align: center; font-weight: bold;">${cmd.details ? cmd.details.reduce((acc, p) => acc + p.quantite, 0) : cmd.quantite || 0}</td>
-                <td style="text-align: center;">
-                    <span style="color: ${couleurStatut}; font-weight:bold; background:rgba(0,0,0,0.2); padding:4px 8px; border-radius:4px; border:1px solid ${couleurStatut}33;">
-                        ${cmd.statut || "Attente Paiement"}
-                    </span>
-                </td>
-                <td style="text-align: right;">
-                    ${cmd.statut !== 'Livrée' ? 
-                    `<button onclick="avancerStatutCommande(${index})" style="background:${cmd.statut === 'Attente Paiement' ? '#ffaa00' : '#00bcff'}; color:#09121a; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px;">
-                        ${cmd.statut === 'Attente Paiement' ? 'Valider Paiement 💰' : 'Valider Livraison 📦'}
-                    </button>` : 
-                    `<span style="color:#a5b1c2; font-size:12px; font-weight:bold;">Archivé ✅</span>`}
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    window.voirDetailsCommande = function(index) {
-        const commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
-        const cmd = commandes[index];
-        
-        if (!cmd.details || cmd.details.length === 0) {
-            alert(`Détail commande de ${cmd.entreprise} :\n- ${cmd.article} (Qté: ${cmd.quantite})`);
-            return;
-        }
-
-        let texteDetails = `📦 DÉTAILS DE LA COMMANDE (${cmd.entreprise}) :\n`;
-        texteDetails += `-------------------------------------------\n`;
-        cmd.details.forEach(p => {
-            texteDetails += `• ${p.article}  --> Quantité : ${p.quantite}\n`;
-        });
-        texteDetails += `-------------------------------------------\n`;
-        texteDetails += `Statut actuel : ${cmd.statut}`;
-        
-        alert(texteDetails);
-    };
-
-    window.avancerStatutCommande = function(index) {
-        let commandes = JSON.parse(localStorage.getItem('commandesGlobales')) || [];
-        let cmd = commandes[index];
-        let ancienStatut = cmd.statut || "Attente Paiement";
-        let nouveauStatut = "";
-
-        if (ancienStatut === "Attente Paiement") {
-            nouveauStatut = "Attente Livraison";
-        } else if (ancienStatut === "Attente Livraison") {
-            nouveauStatut = "Livrée";
-        } else {
-            return;
-        }
-
-        commandes[index].statut = nouveauStatut;
-        localStorage.setItem('commandesGlobales', JSON.stringify(commandes));
-        
-        let archivesGlobales = JSON.parse(localStorage.getItem('archivesGlobales')) || [];
-        const dateActuelle = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        archivesGlobales.unshift({
-            texte: `[${dateActuelle}] DIRECTION : Commande "${cmd.entreprise}" passée de [${ancienStatut}] à [${nouveauStatut}].`
-        });
-        localStorage.setItem('archivesGlobales', JSON.stringify(archivesGlobales));
-        
-        afficherCommandesPourAdmin();
-        if(typeof chargerDonniesAdmin === 'function') chargerDonniesAdmin(); 
-    };
-
-    setTimeout(afficherCommandesPourAdmin, 150);
-    window.addEventListener('click', () => { setTimeout(afficherCommandesPourAdmin, 250); });
-    </script>
 </body>
 </html>

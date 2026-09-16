@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucky Plucker - Espace Commandes Entreprises</title>
+    <title>Bar Plage - Espace Commandes Entreprises</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="dashboard-container">
         <header>
-            <h2>Lucky Plucker</h2>
+            <h2>Bar Plage</h2>
             <p>Espace Partenaires — Passer une commande de stock</p>
         </header>
 
@@ -27,7 +27,7 @@
                     <input type="number" id="orderQuantity" min="1" value="10" required>
                 </div>
 
-                <button type="submit">Envoyer la commande au Lucky Plucker</button>
+                <button type="submit">Envoyer la commande au Bar Plage</button>
             </form>
         </section>
 
@@ -55,17 +55,17 @@
 <script>
 // ====== INJECTION STYLE ORANGE & ADAPTATION DU NOM ======
 function appliquerThemeEtNom() {
-    // Remplacement des mentions textuelles "Tropical Heights" par "Lucky Plucker" au cas où
+    // Remplacement des mentions textuelles "Lucky Plucker" par "Bar Plage" au cas où
     const headerTitle = document.querySelector('header h2');
-    if (headerTitle) headerTitle.textContent = "Lucky Plucker";
+    if (headerTitle) headerTitle.textContent = "Bar Plage";
 
     const subTextPage = document.querySelector('header p');
     if (subTextPage && subTextPage.textContent.includes("Tropical Heights")) {
-        subTextPage.textContent = subTextPage.textContent.replace("Tropical Heights", "Lucky Plucker");
+        subTextPage.textContent = subTextPage.textContent.replace("Tropical Heights", "Bar Plage");
     }
 
-    if (document.title.includes("Tropical Heights")) {
-        document.title = document.title.replace("Tropical Heights", "Lucky Plucker");
+    if (document.title.includes("Bar Plage")) {
+        document.title = document.title.replace("Tropical Heights", "Bar Plage");
     }
 
     // Injection dynamique des styles Orange / Ambre
@@ -110,7 +110,7 @@ function appliquerThemeEtNom() {
 appliquerThemeEtNom();
 
 // ====== LOGIQUE DU PANIER ET DES COMMANDES ======
-const enseigne = "Lucky Plucker";
+const enseigne = "Bar Plage";
 let panier = [];
 const entrepriseNom = localStorage.getItem('entrepriseConnectee') || "Entreprise Partenaire";
 
